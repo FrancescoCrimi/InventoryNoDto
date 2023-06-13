@@ -1,4 +1,5 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
+// Copyright (c) 2023 Francesco Crimi francrim@gmail.com
 // This code is licensed under the MIT License (MIT).
 // THE CODE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
 // INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
@@ -31,12 +32,28 @@ namespace Inventory.Domain.Aggregates.OrderAggregate
         #endregion
 
 
+        #region constructor
+
+        internal protected OrderItem(Product product)
+            : this(product, 1)
+        {
+        }
+
+        internal protected OrderItem(Product product, int quantity)
+        {
+            Product = product;
+            Quantity = quantity;
+        }
+
+        #endregion
+
+
         #region public property
 
         public int OrderLine
         {
             get => orderLine;
-            set => SetProperty(ref orderLine, value);
+            internal protected set => SetProperty(ref orderLine, value);
         }
         public int Quantity
         {
@@ -115,8 +132,6 @@ namespace Inventory.Domain.Aggregates.OrderAggregate
                     ProductId = product.Id;
                     UnitPrice = product.ListPrice;
                     TaxType = product.TaxType;
-                    if (Quantity == 0)
-                        Quantity = 1;
                     OnPropertyChanged(nameof(Subtotal));
                     OnPropertyChanged(nameof(Total));
                 }

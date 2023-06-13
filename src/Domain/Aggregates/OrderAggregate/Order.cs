@@ -1,4 +1,5 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
+// Copyright (c) 2023 Francesco Crimi francrim@gmail.com
 // This code is licensed under the MIT License (MIT).
 // THE CODE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
 // INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
@@ -14,6 +15,7 @@ using System.Collections.ObjectModel;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using Inventory.Domain.Aggregates.CustomerAggregate;
+using Inventory.Domain.Aggregates.ProductAggregate;
 
 namespace Inventory.Domain.Aggregates.OrderAggregate
 {
@@ -40,10 +42,15 @@ namespace Inventory.Domain.Aggregates.OrderAggregate
 
         #endregion
 
+
+        #region constructor
+
         public Order()
         {
             OrderItems = new ObservableCollection<OrderItem>();
         }
+
+        #endregion
 
 
         #region property
@@ -171,10 +178,10 @@ namespace Inventory.Domain.Aggregates.OrderAggregate
 
         public void AddOrderItem(OrderItem orderItem)
         {
-            var orderItemLineNnumber = OrderItems.Max(x => x.OrderLine) + 1;
+            var orderItemLineNumber = OrderItems.Max(x => x.OrderLine) + 1;
             if (!orderItem.IsDraft)
             {
-                orderItem.OrderLine = orderItemLineNnumber;
+                orderItem.OrderLine = orderItemLineNumber;
                 OrderItems.Add(orderItem);
             }
         }
@@ -192,6 +199,13 @@ namespace Inventory.Domain.Aggregates.OrderAggregate
                     idx++;
                 }
             }
+        }
+
+        public OrderItem CreateNewOrderItem(Product product)
+        {
+            var item = new OrderItem(product);
+            item.Order = this;
+            return item;
         }
 
         public static Order CreateNewOrder(Customer customer)
