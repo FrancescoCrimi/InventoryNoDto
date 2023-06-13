@@ -12,7 +12,7 @@ using Inventory.Infrastructure.Common;
 using System;
 using System.Collections.Generic;
 
-namespace Inventory.Domain.Aggregates.CustomerAggregate
+namespace Inventory.Domain.CustomerAggregate
 {
     public class Country : Entity, IEquatable<Country>
     {

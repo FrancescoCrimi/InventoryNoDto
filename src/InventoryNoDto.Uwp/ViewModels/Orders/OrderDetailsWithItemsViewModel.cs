@@ -10,7 +10,7 @@
 // THE CODE OR THE USE OR OTHER DEALINGS IN THE CODE.
 
 using CommunityToolkit.Mvvm.Messaging;
-using Inventory.Domain.Aggregates.OrderAggregate;
+using Inventory.Domain.OrderAggregate;
 using Inventory.Uwp.ViewModels.Common;
 using Inventory.Uwp.ViewModels.Message;
 using Inventory.Uwp.ViewModels.OrderItems;

@@ -10,7 +10,7 @@
 // THE CODE OR THE USE OR OTHER DEALINGS IN THE CODE.
 
 using System.Collections.Generic;
-using Inventory.Domain.Aggregates.ProductAggregate;
+using Inventory.Domain.ProductAggregate;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 

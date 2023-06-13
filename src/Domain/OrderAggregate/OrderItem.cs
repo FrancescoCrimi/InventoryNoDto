@@ -9,9 +9,9 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH
 // THE CODE OR THE USE OR OTHER DEALINGS IN THE CODE.
 
-using Inventory.Domain.Aggregates.ProductAggregate;
+using Inventory.Domain.ProductAggregate;
 
-namespace Inventory.Domain.Aggregates.OrderAggregate
+namespace Inventory.Domain.OrderAggregate
 {
     public class OrderItem : Infrastructure.Common.ObservableObject<OrderItem>
     {
@@ -33,6 +33,10 @@ namespace Inventory.Domain.Aggregates.OrderAggregate
 
 
         #region constructor
+
+        protected OrderItem()
+        {
+        }
 
         internal protected OrderItem(Product product)
             : this(product, 1)

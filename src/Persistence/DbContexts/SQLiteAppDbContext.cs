@@ -8,9 +8,9 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH
 // THE CODE OR THE USE OR OTHER DEALINGS IN THE CODE.
 
-using Inventory.Domain.Aggregates.CustomerAggregate;
-using Inventory.Domain.Aggregates.OrderAggregate;
-using Inventory.Domain.Aggregates.ProductAggregate;
+using Inventory.Domain.CustomerAggregate;
+using Inventory.Domain.OrderAggregate;
+using Inventory.Domain.ProductAggregate;
 using Inventory.Infrastructure.Logging;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;

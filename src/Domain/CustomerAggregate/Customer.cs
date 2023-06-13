@@ -13,7 +13,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace Inventory.Domain.Aggregates.CustomerAggregate
+namespace Inventory.Domain.CustomerAggregate
 {
     public class Customer : ObservableObject<Customer>, IEquatable<Customer>
     {

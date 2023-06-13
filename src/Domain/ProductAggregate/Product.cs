@@ -12,7 +12,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace Inventory.Domain.Aggregates.ProductAggregate
+namespace Inventory.Domain.ProductAggregate
 {
     public class Product : Infrastructure.Common.ObservableObject<Product>, IEquatable<Product>
     {

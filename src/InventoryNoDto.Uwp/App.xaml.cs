@@ -56,7 +56,6 @@ namespace InventoryNoDto.Uwp
             Ioc.Default.ConfigureServices(ConfigureServices());
         }
 
-
         protected async override void OnActivated(IActivatedEventArgs e)
         {
             await Ioc.Default.GetService<ActivationService>().ActivateAsync(e);

@@ -14,10 +14,10 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
-using Inventory.Domain.Aggregates.CustomerAggregate;
-using Inventory.Domain.Aggregates.ProductAggregate;
+using Inventory.Domain.CustomerAggregate;
+using Inventory.Domain.ProductAggregate;
 
-namespace Inventory.Domain.Aggregates.OrderAggregate
+namespace Inventory.Domain.OrderAggregate
 {
     public class Order : Infrastructure.Common.ObservableObject<Order>, IEquatable<Order>
     {

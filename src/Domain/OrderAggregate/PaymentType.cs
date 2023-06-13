@@ -14,13 +14,12 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace Inventory.Domain.Aggregates.OrderAggregate
+namespace Inventory.Domain.OrderAggregate
 {
-    [Table("Shippers")]
-    public class Shipper : Entity, IEquatable<Shipper>
+    [Table("PaymentTypes")]
+    public class PaymentType : Entity, IEquatable<PaymentType>
     {
         private string name;
-        private string phone;
 
         [Required]
         [MaxLength(50)]
@@ -30,21 +29,14 @@ namespace Inventory.Domain.Aggregates.OrderAggregate
             set => SetProperty(ref name, value);
         }
 
-        [MaxLength(20)]
-        public string Phone
-        {
-            get => phone;
-            set => SetProperty(ref phone, value);
-        }
-
         #region Equals
 
         public override bool Equals(object obj)
         {
-            return Equals(obj as Shipper);
+            return Equals(obj as PaymentType);
         }
 
-        public bool Equals(Shipper other)
+        public bool Equals(PaymentType other)
         {
             return !(other is null) &&
                    Id == other.Id;
@@ -55,12 +47,12 @@ namespace Inventory.Domain.Aggregates.OrderAggregate
             return HashCode.Combine(Id);
         }
 
-        public static bool operator ==(Shipper left, Shipper right)
+        public static bool operator ==(PaymentType left, PaymentType right)
         {
-            return EqualityComparer<Shipper>.Default.Equals(left, right);
+            return EqualityComparer<PaymentType>.Default.Equals(left, right);
         }
 
-        public static bool operator !=(Shipper left, Shipper right)
+        public static bool operator !=(PaymentType left, PaymentType right)
         {
             return !(left == right);
         }

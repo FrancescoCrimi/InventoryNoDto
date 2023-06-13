@@ -12,7 +12,7 @@
     <Grid>
         <!--<controls:WindowTitle Title="{x:Bind ViewModel.Title, Mode=OneWay}" />-->
 
-        <libcontrols:Section IsEnabled="{x:Bind ViewModel.IsEnabled, Mode=OneWay}"
+        <libcontrols:Section IsEnabled="True"
                              Style="{StaticResource DetailsViewSection}">
             <local:OrderItemDetailsControl x:Name="details"
                                            ViewModel="{x:Bind ViewModel, Mode=OneWay}" />

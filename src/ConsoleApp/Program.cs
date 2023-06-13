@@ -9,7 +9,6 @@
 // THE CODE OR THE USE OR OTHER DEALINGS IN THE CODE.
 
 using CommunityToolkit.Mvvm.DependencyInjection;
-using Inventory.Domain.Repository;
 using Inventory.Infrastructure;
 using Inventory.Infrastructure.Common;
 using Inventory.Persistence;

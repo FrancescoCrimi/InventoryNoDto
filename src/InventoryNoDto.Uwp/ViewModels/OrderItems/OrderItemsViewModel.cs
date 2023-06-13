@@ -9,7 +9,7 @@
 // THE CODE OR THE USE OR OTHER DEALINGS IN THE CODE.
 
 using CommunityToolkit.Mvvm.Messaging;
-using Inventory.Domain.Aggregates.OrderAggregate;
+using Inventory.Domain.OrderAggregate;
 using Inventory.Infrastructure.Logging;
 using Inventory.Uwp.ViewModels.Common;
 using Inventory.Uwp.ViewModels.Message;
@@ -44,7 +44,7 @@ namespace Inventory.Uwp.ViewModels.OrderItems
 
         public void Unload()
         {
-            OrderItemDetails.CancelEdit();
+            //OrderItemDetails.CancelEdit();
             OrderItemList.Unload();
         }
 
@@ -72,11 +72,11 @@ namespace Inventory.Uwp.ViewModels.OrderItems
 
         private async void OnItemSelected()
         {
-            if (OrderItemDetails.IsEditMode)
-            {
+            //if (OrderItemDetails.IsEditMode)
+            //{
                 StatusReady();
-                OrderItemDetails.CancelEdit();
-            }
+            //    OrderItemDetails.CancelEdit();
+            //}
             var selected = OrderItemList.SelectedItem;
             if (!OrderItemList.IsMultipleSelection)
             {

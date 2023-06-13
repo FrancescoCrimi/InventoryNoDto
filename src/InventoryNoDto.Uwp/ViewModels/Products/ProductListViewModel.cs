@@ -16,7 +16,7 @@ using System.Windows.Input;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using Inventory.Application;
-using Inventory.Domain.Aggregates.ProductAggregate;
+using Inventory.Domain.ProductAggregate;
 using Inventory.Infrastructure.Common;
 using Inventory.Infrastructure.Logging;
 using Inventory.Uwp.Library.Common;

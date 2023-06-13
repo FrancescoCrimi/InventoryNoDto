@@ -16,8 +16,7 @@ using System.Threading.Tasks;
 using System.Windows.Input;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
-using Inventory.Domain.Aggregates.OrderAggregate;
-using Inventory.Domain.Repository;
+using Inventory.Domain.OrderAggregate;
 using Inventory.Infrastructure.Common;
 using Inventory.Infrastructure.Logging;
 using Inventory.Uwp.Library.Common;
@@ -32,18 +31,17 @@ namespace Inventory.Uwp.ViewModels.OrderItems
     public class OrderItemListViewModel : GenericListViewModel<OrderItem>
     {
         private readonly ILogger _logger;
-        private readonly IOrderItemRepository _orderItemRepository;
         private readonly NavigationService _navigationService;
         private readonly WindowManagerService _windowService;
+        private Order Order;
 
         public OrderItemListViewModel(ILogger<OrderItemListViewModel> logger,
-                                      IOrderItemRepository orderItemRepository,
                                       NavigationService navigationService,
                                       WindowManagerService windowService)
             : base()
         {
             _logger = logger;
-            _orderItemRepository = orderItemRepository;
+            //_orderItemRepository = orderItemRepository;
             _navigationService = navigationService;
             _windowService = windowService;
         }
@@ -58,18 +56,8 @@ namespace Inventory.Uwp.ViewModels.OrderItems
             ViewModelArgs = args ?? new OrderItemListArgs();
             Query = ViewModelArgs.Query;
 
-            if (silent)
-            {
-                await RefreshAsync();
-            }
-            else
-            {
-                StartStatusMessage("Loading order items...");
-                if (await RefreshAsync())
-                {
-                    EndStatusMessage("OrderItems loaded");
-                }
-            }
+            Order = ViewModelArgs.Order;
+            await Task.CompletedTask;
         }
 
         public void Unload()
@@ -79,14 +67,11 @@ namespace Inventory.Uwp.ViewModels.OrderItems
 
         public void Subscribe()
         {
-            //MessageService.Subscribe<OrderItemListViewModel>(this, OnMessage);
-            //MessageService.Subscribe<OrderItemDetailsViewModel>(this, OnMessage);
             Messenger.Register<ViewModelsMessage<OrderItem>>(this, OnMessage);
         }
 
         public void Unsubscribe()
         {
-            //MessageService.Unsubscribe(this);
             Messenger.UnregisterAll(this);
         }
 
@@ -95,8 +80,8 @@ namespace Inventory.Uwp.ViewModels.OrderItems
             return new OrderItemListArgs
             {
                 Query = Query,
-                OrderBy = ViewModelArgs.OrderBy,
-                OrderByDesc = ViewModelArgs.OrderByDesc,
+                //OrderBy = ViewModelArgs.OrderBy,
+                //OrderByDesc = ViewModelArgs.OrderByDesc,
                 OrderId = ViewModelArgs.OrderId
             };
         }
@@ -108,21 +93,11 @@ namespace Inventory.Uwp.ViewModels.OrderItems
             ItemsCount = 0;
             SelectedItem = null;
 
-            try
-            {
-                DataRequest<OrderItem> request = BuildDataRequest();
-                Items = await _orderItemRepository.GetOrderItemsAsync(0, 100, request);
-            }
-            catch (Exception ex)
-            {
-                Items = new List<OrderItem>();
-                StatusError($"Error loading Order items: {ex.Message}");
-                _logger.LogError(LogEvents.Refresh, ex, "Error loading Order items");
-                isOk = false;
-            }
+            Items = Order.OrderItems;
 
             ItemsCount = Items.Count;
             OnPropertyChanged(nameof(Title));
+            await Task.CompletedTask;
             return isOk;
         }
 
@@ -166,15 +141,16 @@ namespace Inventory.Uwp.ViewModels.OrderItems
                 var count = 0;
                 try
                 {
-                    if (SelectedIndexRanges != null)
-                    {
-                        count = SelectedIndexRanges.Sum(r => r.Length);
-                        StartStatusMessage($"Deleting {count} order items...");
-                        await DeleteRangesAsync(SelectedIndexRanges);
-                        //MessageService.Send(this, "ItemRangesDeleted", SelectedIndexRanges);
-                        Messenger.Send(new ViewModelsMessage<OrderItem>("ItemRangesDeleted", SelectedIndexRanges));
-                    }
-                    else if (SelectedItems != null)
+                    //if (SelectedIndexRanges != null)
+                    //{
+                    //    count = SelectedIndexRanges.Sum(r => r.Length);
+                    //    StartStatusMessage($"Deleting {count} order items...");
+                    //    await DeleteRangesAsync(SelectedIndexRanges);
+                    //    //MessageService.Send(this, "ItemRangesDeleted", SelectedIndexRanges);
+                    //    Messenger.Send(new ViewModelsMessage<OrderItem>("ItemRangesDeleted", SelectedIndexRanges));
+                    //}
+                    //else
+                    if (SelectedItems != null)
                     {
                         count = SelectedItems.Count();
                         StartStatusMessage($"Deleting {count} order items...");
@@ -203,28 +179,30 @@ namespace Inventory.Uwp.ViewModels.OrderItems
         {
             foreach (var model in models)
             {
-                await _orderItemRepository.DeleteOrderItemsAsync(model);
+                //await _orderItemRepository.DeleteOrderItemsAsync(model);
+                Order.RemoveOrderItemLine(model.OrderLine);
+                await Task.CompletedTask;
             }
         }
 
-        private async Task DeleteRangesAsync(IEnumerable<IndexRange> ranges)
-        {
-            DataRequest<OrderItem> request = BuildDataRequest();
-            foreach (var range in ranges)
-            {
-                //await _orderItemService.DeleteOrderItemRangeAsync(range.Index, range.Length, request);
-                var items = await _orderItemRepository.GetOrderItemKeysAsync(range.Index, range.Length, request);
-                await _orderItemRepository.DeleteOrderItemsAsync(items.ToArray());
-            }
-        }
+        //private async Task DeleteRangesAsync(IEnumerable<IndexRange> ranges)
+        //{
+        //    DataRequest<OrderItem> request = BuildDataRequest();
+        //    foreach (var range in ranges)
+        //    {
+        //        //await _orderItemService.DeleteOrderItemRangeAsync(range.Index, range.Length, request);
+        //        var items = await _orderItemRepository.GetOrderItemKeysAsync(range.Index, range.Length, request);
+        //        await _orderItemRepository.DeleteOrderItemsAsync(items.ToArray());
+        //    }
+        //}
 
         private DataRequest<OrderItem> BuildDataRequest()
         {
             var request = new DataRequest<OrderItem>()
             {
                 Query = Query,
-                OrderBy = ViewModelArgs.OrderBy,
-                OrderByDesc = ViewModelArgs.OrderByDesc
+                //OrderBy = ViewModelArgs.OrderBy,
+                //OrderByDesc = ViewModelArgs.OrderByDesc
             };
             if (ViewModelArgs.OrderId > 0)
             {
@@ -232,22 +210,6 @@ namespace Inventory.Uwp.ViewModels.OrderItems
             }
             return request;
         }
-
-        //private async void OnMessage(ViewModelBase sender, string message, object args)
-        //{
-        //    switch (message)
-        //    {
-        //        case "NewItemSaved":
-        //        case "ItemDeleted":
-        //        case "ItemsDeleted":
-        //        case "ItemRangesDeleted":
-        //            //await ContextService.RunAsync(async () =>
-        //            //{
-        //                await RefreshAsync();
-        //            //});
-        //            break;
-        //    }
-        //}
 
         private async void OnMessage(object recipient, ViewModelsMessage<OrderItem> message)
         {

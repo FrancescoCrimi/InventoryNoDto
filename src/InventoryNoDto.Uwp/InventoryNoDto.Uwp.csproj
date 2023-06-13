@@ -334,7 +334,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Application\Inventory.Application.csproj">
-      <Project>{f006d97f-7405-4d7e-9734-0b16ae58b3d6}</Project>
+      <Project>{a244e92d-b30d-48de-8f4a-90f9da9c1fdc}</Project>
       <Name>Inventory.Application</Name>
     </ProjectReference>
     <ProjectReference Include="..\Domain\Inventory.Domain.csproj">

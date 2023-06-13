@@ -8,6 +8,8 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH
 // THE CODE OR THE USE OR OTHER DEALINGS IN THE CODE.
 
+using Inventory.Domain.OrderAggregate;
+
 namespace Inventory.Uwp.ViewModels.OrderItems
 {
     public class OrderItemDetailsArgs
@@ -16,6 +18,8 @@ namespace Inventory.Uwp.ViewModels.OrderItems
 
         public long OrderID { get; set; }
         public int OrderLine { get; set; }
+        public OrderItem OrderItem { get; set; }
+        public Order Order { get; set; }
 
         public bool IsNew => OrderLine <= 0;
     }

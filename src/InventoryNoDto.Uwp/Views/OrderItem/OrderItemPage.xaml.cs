@@ -35,11 +35,11 @@ namespace Inventory.Uwp.Views.OrderItems
             ViewModel.Subscribe();
             await ViewModel.LoadAsync(e.Parameter as OrderItemDetailsArgs);
 
-            if (ViewModel.IsEditMode)
-            {
+            //if (ViewModel.IsEditMode)
+            //{
                 await Task.Delay(100);
                 details.SetFocus();
-            }
+            //}
         }
 
         protected override void OnNavigatingFrom(NavigatingCancelEventArgs e)

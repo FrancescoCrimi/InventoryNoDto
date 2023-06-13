@@ -13,7 +13,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace Inventory.Domain.Aggregates.OrderAggregate
+namespace Inventory.Domain.OrderAggregate
 {
     public interface IOrderRepository : IDisposable
     {

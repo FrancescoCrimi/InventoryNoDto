@@ -9,7 +9,7 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH
 // THE CODE OR THE USE OR OTHER DEALINGS IN THE CODE.
 
-using Inventory.Domain.Aggregates.OrderAggregate;
+using Inventory.Domain.OrderAggregate;
 using System;
 using System.Linq.Expressions;
 
@@ -19,14 +19,14 @@ namespace Inventory.Uwp.ViewModels.OrderItems
     {
         public OrderItemListArgs()
         {
-            OrderBy = r => r.OrderLine;
+            //OrderBy = r => r.OrderLine;
         }
 
         public long OrderId { get; set; }
-
         public string Query { get; set; }
+        public Order Order { get; set; }
 
-        public Expression<Func<OrderItem, object>> OrderBy { get; set; }
-        public Expression<Func<OrderItem, object>> OrderByDesc { get; set; }
+        //public Expression<Func<OrderItem, object>> OrderBy { get; set; }
+        //public Expression<Func<OrderItem, object>> OrderByDesc { get; set; }
     }
 }

@@ -10,7 +10,7 @@
 
 using System;
 using System.Linq.Expressions;
-using Inventory.Domain.Aggregates.OrderAggregate;
+using Inventory.Domain.OrderAggregate;
 
 namespace Inventory.Uwp.ViewModels.Orders
 {

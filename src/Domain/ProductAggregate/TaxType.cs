@@ -11,45 +11,40 @@
 using Inventory.Infrastructure.Common;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
-namespace Inventory.Domain.Aggregates.ProductAggregate
+namespace Inventory.Domain.ProductAggregate
 {
-    public class Category : Entity, IEquatable<Category>
+    [Table("TaxTypes")]
+    public class TaxType : Entity, IEquatable<TaxType>
     {
         private string name;
-        private string description;
-        private byte[] picture;
-        private byte[] thumbnail;
+        private decimal rate;
 
+        [Required]
+        [MaxLength(50)]
         public string Name
         {
             get => name;
             set => SetProperty(ref name, value);
         }
-        public string Description
+
+        [Required]
+        public decimal Rate
         {
-            get => description;
-            set => SetProperty(ref description, value);
-        }
-        public byte[] Picture
-        {
-            get => picture;
-            set => SetProperty(ref picture, value);
-        }
-        public byte[] Thumbnail
-        {
-            get => thumbnail;
-            set => SetProperty(ref thumbnail, value);
+            get => rate;
+            set => SetProperty(ref rate, value);
         }
 
         #region Equals
 
         public override bool Equals(object obj)
         {
-            return Equals(obj as Category);
+            return Equals(obj as TaxType);
         }
 
-        public bool Equals(Category other)
+        public bool Equals(TaxType other)
         {
             return !(other is null) &&
                    Id == other.Id;
@@ -60,12 +55,12 @@ namespace Inventory.Domain.Aggregates.ProductAggregate
             return HashCode.Combine(Id);
         }
 
-        public static bool operator ==(Category left, Category right)
+        public static bool operator ==(TaxType left, TaxType right)
         {
-            return EqualityComparer<Category>.Default.Equals(left, right);
+            return EqualityComparer<TaxType>.Default.Equals(left, right);
         }
 
-        public static bool operator !=(Category left, Category right)
+        public static bool operator !=(TaxType left, TaxType right)
         {
             return !(left == right);
         }

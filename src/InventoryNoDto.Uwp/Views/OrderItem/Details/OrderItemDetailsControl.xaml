@@ -18,34 +18,34 @@
                                     Columns="2"
                                     ColumnSpacing="12"
                                     RowSpacing="12">
-                <controls:ProductSuggestBox DisplayText="{x:Bind EditableItem.Product.Name, Mode=OneWay}"
+                <controls:ProductSuggestBox DisplayText="{x:Bind Item.Product.Name, Mode=OneWay}"
                                             ProductSelectedCommand="{x:Bind ProductSelectedCommand}" />
                 <Rectangle />
                 <libcontrols:FormTextBox Header="Quantity"
-                                         Text="{x:Bind EditableItem.Quantity, Mode=TwoWay, Converter={StaticResource Int32Converter}}"
+                                         Text="{x:Bind Item.Quantity, Mode=TwoWay, Converter={StaticResource Int32Converter}}"
                                          DataType="Integer" />
                 <libcontrols:FormTextBox Header="Unit Price"
-                                         Text="{x:Bind EditableItem.UnitPrice, Mode=OneWay, Converter={StaticResource DecimalConverter}}"
+                                         Text="{x:Bind Item.UnitPrice, Mode=OneWay, Converter={StaticResource DecimalConverter}}"
                                          DataType="Decimal"
                                          Format="0.00"
                                          Mode="ReadOnly" />
 
                 <libcontrols:FormTextBox Header="Discount"
-                                         Text="{x:Bind EditableItem.Discount, Mode=TwoWay, Converter={StaticResource DecimalConverter}}"
+                                         Text="{x:Bind Item.Discount, Mode=TwoWay, Converter={StaticResource DecimalConverter}}"
                                          DataType="Decimal"
                                          Format="0.00" />
                 <libcontrols:FormTextBox Header="Subtotal"
-                                         Text="{x:Bind EditableItem.Subtotal, Mode=OneWay, Converter={StaticResource DecimalConverter}}"
+                                         Text="{x:Bind Item.Subtotal, Mode=OneWay, Converter={StaticResource DecimalConverter}}"
                                          DataType="Decimal"
                                          Format="0.00"
                                          Mode="ReadOnly" />
 
                 <libcontrols:FormComboBox Header="Tax Type"
                                           ItemsSource="{x:Bind TaxTypes}"
-                                          SelectedItem="{x:Bind EditableItem.TaxType, Mode=TwoWay}"
+                                          SelectedItem="{x:Bind Item.TaxType, Mode=TwoWay}"
                                           DisplayMemberPath="Name" />
                 <libcontrols:FormTextBox Header="Total"
-                                         Text="{x:Bind EditableItem.Total, Mode=OneWay, Converter={StaticResource DecimalConverter}}"
+                                         Text="{x:Bind Item.Total, Mode=OneWay, Converter={StaticResource DecimalConverter}}"
                                          DataType="Decimal"
                                          Format="0.00"
                                          Mode="ReadOnly" />
@@ -71,13 +71,16 @@
                              Margin="6"
                              DetailsContent="{x:Bind ViewModel}"
                              DetailsTemplate="{StaticResource DetailsTemplate}"
+                             />
+        <!--
                              CanGoBack="{x:Bind ViewModel.CanGoBack}"
                              IsEditMode="{x:Bind ViewModel.IsEditMode, Mode=OneWay}"
                              BackCommand="{x:Bind ViewModel.BackCommand}"
                              EditCommand="{x:Bind ViewModel.EditCommand}"
                              DeleteCommand="{x:Bind ViewModel.DeleteCommand}"
                              SaveCommand="{x:Bind ViewModel.SaveCommand}"
-                             CancelCommand="{x:Bind ViewModel.CancelCommand}" />
-
+                             CancelCommand="{x:Bind ViewModel.CancelCommand}"
+        -->
+        
     </Grid>
 </UserControl>

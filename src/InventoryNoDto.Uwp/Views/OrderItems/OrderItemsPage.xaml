@@ -50,18 +50,18 @@
                   BorderBrush="LightGray"
                   BorderThickness="0,1,0,0"
                   Visibility="{x:Bind ViewModel.OrderItemList.IsMultipleSelection, Mode=OneWay, Converter={StaticResource InverseBoolToVisibilityConverter}}">
-                <libcontrols:Section IsEnabled="{x:Bind ViewModel.OrderItemDetails.IsEnabled, Mode=OneWay}"
+                <libcontrols:Section IsEnabled="True"
                                      Background="{StaticResource DetailsViewBackgroundColor}"
                                      HeaderButtonGlyph="&#xE2B4;"
                                      HeaderButtonClick="OpenDetailsInNewView"
-                                     Visibility="{x:Bind ViewModel.OrderItemDetails.IsDataAvailable, Mode=OneWay}">
+                                     Visibility="Visible">
                     <local:OrderItemsDetailsControl Grid.Row="1"
                                                     ViewModel="{x:Bind ViewModel.OrderItemDetails}" />
                 </libcontrols:Section>
 
                 <!--Empty Details-->
                 <libcontrols:Section Header="No item selected"
-                                     Visibility="{x:Bind ViewModel.OrderItemDetails.IsDataUnavailable, Mode=OneWay}" />
+                                     Visibility="Collapsed" />
             </Grid>
         </Grid>
     </Grid>

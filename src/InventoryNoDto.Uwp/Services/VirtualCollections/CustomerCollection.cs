@@ -14,7 +14,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Inventory.Application;
-using Inventory.Domain.Aggregates.CustomerAggregate;
+using Inventory.Domain.CustomerAggregate;
 using Inventory.Infrastructure.Common;
 using Inventory.Infrastructure.Logging;
 using Inventory.Uwp.Library.Common;

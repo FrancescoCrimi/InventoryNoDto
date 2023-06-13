@@ -12,7 +12,7 @@ using Inventory.Infrastructure.Common;
 using System;
 using System.Collections.Generic;
 
-namespace Inventory.Domain.Aggregates.OrderAggregate
+namespace Inventory.Domain.OrderAggregate
 {
     public class OrderStatus : Entity, IEquatable<OrderStatus>
     {

@@ -18,7 +18,7 @@ using System.Threading.Tasks;
 using System.Windows.Input;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using Inventory.Application;
-using Inventory.Domain.Aggregates.ProductAggregate;
+using Inventory.Domain.ProductAggregate;
 using Inventory.Infrastructure.Common;
 using Inventory.Uwp.Library.Controls;
 using Inventory.Uwp.Library.Extensions;

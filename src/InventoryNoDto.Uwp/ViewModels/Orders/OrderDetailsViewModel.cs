@@ -11,8 +11,8 @@
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using Inventory.Application;
-using Inventory.Domain.Aggregates.CustomerAggregate;
-using Inventory.Domain.Aggregates.OrderAggregate;
+using Inventory.Domain.CustomerAggregate;
+using Inventory.Domain.OrderAggregate;
 using Inventory.Infrastructure.Logging;
 using Inventory.Uwp.Common;
 using Inventory.Uwp.Services;

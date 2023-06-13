@@ -53,7 +53,7 @@ namespace Inventory.Uwp.Views.OrderItems
 
         private async void OpenDetailsInNewView(object sender, RoutedEventArgs e)
         {
-            ViewModel.OrderItemDetails.CancelEdit();
+            //ViewModel.OrderItemDetails.CancelEdit();
             await windowService.OpenInNewWindow<OrderItemDetailsControl>(ViewModel.OrderItemDetails.CreateArgs());
         }
 

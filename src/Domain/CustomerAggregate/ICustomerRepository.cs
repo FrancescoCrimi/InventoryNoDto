@@ -8,22 +8,22 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH
 // THE CODE OR THE USE OR OTHER DEALINGS IN THE CODE.
 
-using Inventory.Domain.Aggregates.OrderAggregate;
 using Inventory.Infrastructure.Common;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace Inventory.Domain.Repository
+namespace Inventory.Domain.CustomerAggregate
 {
-    public interface IOrderItemRepository : IDisposable
+    public interface ICustomerRepository : IDisposable
     {
-        Task<OrderItem> GetOrderItemAsync(long orderID, int orderLine);
-        Task<OrderItem> GetOrderItemAsync(long id);
-        Task<IList<OrderItem>> GetOrderItemsAsync(int skip, int take, DataRequest<OrderItem> request);
-        Task<IList<OrderItem>> GetOrderItemKeysAsync(int skip, int take, DataRequest<OrderItem> request);
-        Task<int> GetOrderItemsCountAsync(DataRequest<OrderItem> request);
-        Task<int> UpdateOrderItemAsync(OrderItem orderItem);
-        Task<int> DeleteOrderItemsAsync(params OrderItem[] orderItems);
+        Task<Customer> GetCustomerAsync(long id);
+        Task<IList<Customer>> GetCustomersAsync(int skip, int take, DataRequest<Customer> request);
+        Task<IList<Customer>> GetCustomerKeysAsync(int skip, int take, DataRequest<Customer> request);
+        Task<int> GetCustomersCountAsync(DataRequest<Customer> request);
+        Task<int> UpdateCustomerAsync(Customer customer);
+        Task<int> DeleteCustomersAsync(params Customer[] customers);
+
+        Task<List<Country>> GetCountriesAsync();
     }
 }
