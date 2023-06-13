@@ -135,14 +135,16 @@ namespace Inventory.Persistence.Repository
             }
             else
             {
-                orderItem.OrderLine = _dataSource.OrderItems.Where(r => r.OrderId == orderItem.OrderId).Select(r => r.OrderLine).DefaultIfEmpty(0).Max() + 1;
-                // TODO: 
-                //orderItem.CreateOn = DateTime.UtcNow;
-                _dataSource.Entry(orderItem).State = EntityState.Added;
+                var query = _dataSource.OrderItems.AsQueryable();
+                query = query.Where(x => x.OrderId == orderItem.OrderId);
+                var query2 = query.Select(r => r.OrderLine);
+                orderItem.OrderLine = query2.Max() + 1;
+
+                //orderItem.OrderLine = _dataSource.OrderItems.Where(r => r.OrderId == orderItem.OrderId).Select(r => r.OrderLine).DefaultIfEmpty(0).Max() + 1;
+
+                _dataSource.Attach(orderItem);
+                _dataSource.OrderItems.Add(orderItem);
             }
-            // TODO: 
-            //orderItem.LastModifiedOn = DateTime.UtcNow;
-            //orderItem.SearchTerms = orderItem.BuildSearchTerms();
             return await _dataSource.SaveChangesAsync();
         }
 

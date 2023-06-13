@@ -10,7 +10,9 @@
 
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Linq;
 using Inventory.Domain.Aggregates.CustomerAggregate;
 
 namespace Inventory.Domain.Aggregates.OrderAggregate
@@ -37,6 +39,11 @@ namespace Inventory.Domain.Aggregates.OrderAggregate
         private long statusId;
 
         #endregion
+
+        public Order()
+        {
+            OrderItems = new ObservableCollection<OrderItem>();
+        }
 
 
         #region property
@@ -133,7 +140,7 @@ namespace Inventory.Domain.Aggregates.OrderAggregate
         public virtual Shipper Shipper { get; set; }
         public virtual Country ShipCountry { get; set; }
         public virtual OrderStatus Status { get; set; }
-        public virtual ICollection<OrderItem> OrderItems { get; set; }
+        public virtual ObservableCollection<OrderItem> OrderItems { get; set; }
 
         #endregion
 
@@ -161,6 +168,31 @@ namespace Inventory.Domain.Aggregates.OrderAggregate
         #region public method
 
         public string BuildSearchTerms() => $"{Id} {CustomerId} {ShipCity} {ShipRegion}".ToLower();
+
+        public void AddOrderItem(OrderItem orderItem)
+        {
+            var orderItemLineNnumber = OrderItems.Max(x => x.OrderLine) + 1;
+            if (!orderItem.IsDraft)
+            {
+                orderItem.OrderLine = orderItemLineNnumber;
+                OrderItems.Add(orderItem);
+            }
+        }
+
+        public void RemoveOrderItemLine(int index)
+        {
+            var orderItem = OrderItems.FirstOrDefault(x => x.OrderLine == index);
+            if (orderItem != null)
+            {
+                OrderItems.Remove(orderItem);
+                int idx = 1;
+                foreach (var item in OrderItems.OrderBy(o => o.OrderLine))
+                {
+                    item.OrderLine = idx;
+                    idx++;
+                }
+            }
+        }
 
         public static Order CreateNewOrder(Customer customer)
         {

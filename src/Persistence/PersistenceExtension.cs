@@ -32,19 +32,19 @@ namespace Inventory.Persistence
             {
                 options
                     .UseLazyLoadingProxies()
-                    //.EnableSensitiveDataLogging(true)
+                    .EnableSensitiveDataLogging(true)
                     .UseSqlite(settings.SQLiteConnectionString);
-                //}, ServiceLifetime.Transient, ServiceLifetime.Transient);
-            });
+            }, ServiceLifetime.Transient, ServiceLifetime.Transient);
+            //});
 
             serviceCollection.AddDbContext<SQLServerAppDbContext>(options =>
             {
                 options
                     .UseLazyLoadingProxies()
-                    //.EnableSensitiveDataLogging(true)
+                    .EnableSensitiveDataLogging(true)
                     .UseSqlServer(settings.SQLServerConnectionString);
-                //}, ServiceLifetime.Transient, ServiceLifetime.Transient);
-            });
+            }, ServiceLifetime.Transient, ServiceLifetime.Transient);
+            //});
 
             switch (settings.DataProvider)
             {
