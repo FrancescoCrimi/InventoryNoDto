@@ -9,6 +9,7 @@
 // THE CODE OR THE USE OR OTHER DEALINGS IN THE CODE.
 
 using Inventory.Domain.ProductAggregate;
+using Inventory.Infrastructure;
 using Inventory.Infrastructure.Common;
 using Inventory.Infrastructure.Logging;
 using Microsoft.Extensions.Logging;
@@ -21,58 +22,21 @@ using System.Threading.Tasks;
 
 namespace Inventory.Application
 {
-    public class ProductService
+    public class ProductService : BaseService
     {
         private readonly ILogger _logger;
+        private readonly IUnitOfWork _unitOfWork;
         private readonly IProductRepository _productRepository;
-        private static List<Category> _categories;
-        private static List<TaxType> _taxTypes;
 
         public ProductService(ILogger<ProductService> logger,
+                              IServiceProvider serviceProvider,
+                              IUnitOfWork unitOfWork,
                               IProductRepository productRepository)
+            : base(logger, serviceProvider)
         {
             _logger = logger;
+            _unitOfWork = unitOfWork;
             _productRepository = productRepository;
-        }
-
-        public IEnumerable<Category> Categories
-        {
-            get
-            {
-                if (_categories == null)
-                {
-                    try
-                    {
-                        _categories = _productRepository.GetCategoriesAsync().Result;
-                    }
-                    catch (Exception ex)
-                    {
-                        _categories = new List<Category>();
-                        _logger.LogError(LogEvents.LoadCategories, ex, "Load Categories");
-                    }
-                }
-                return _categories;
-            }
-        }
-
-        public IEnumerable<TaxType> TaxTypes
-        {
-            get
-            {
-                if (_taxTypes == null)
-                {
-                    try
-                    {
-                        _taxTypes =  _productRepository.GetTaxTypesAsync().Result;
-                    }
-                    catch (Exception ex)
-                    {
-                        _taxTypes = new List<TaxType>();
-                        _logger.LogError(LogEvents.LoadTaxTypes, ex, "Load TaxTypes");
-                    }
-                }
-                return _taxTypes;
-            }
         }
 
         public async Task<IList<Product>> GetProductsAsync(int index, int length, DataRequest<Product> request)

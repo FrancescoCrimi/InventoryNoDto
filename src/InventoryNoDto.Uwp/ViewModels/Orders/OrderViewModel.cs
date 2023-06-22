@@ -10,20 +10,30 @@
 // THE CODE OR THE USE OR OTHER DEALINGS IN THE CODE.
 
 using CommunityToolkit.Mvvm.Messaging;
+using Inventory.Application;
 using Inventory.Domain.OrderAggregate;
 using Inventory.Uwp.ViewModels.Common;
 using Inventory.Uwp.ViewModels.Message;
 using Inventory.Uwp.ViewModels.OrderItems;
+using InventoryNoDto.Uwp.ViewModels.Orders;
+using Microsoft.Extensions.Logging;
 using System.Threading.Tasks;
 
 namespace Inventory.Uwp.ViewModels.Orders
 {
-    public class OrderDetailsWithItemsViewModel : ViewModelBase
+    public class OrderViewModel : ViewModelBase
     {
-        public OrderDetailsWithItemsViewModel(OrderDetailsViewModel orderDetailsViewModel,
-                                              OrderItemListViewModel orderItemListViewModel)
+        private readonly ILogger _logger;
+        private readonly OrderService _orderService;
+
+        public OrderViewModel(ILogger<OrderViewModel> logger,
+                              OrderService orderService,
+                              OrderDetailsViewModel orderDetailsViewModel,
+                              OrderItemListViewModel orderItemListViewModel)
             : base()
         {
+            _logger = logger;
+            _orderService = orderService;
             OrderDetails = orderDetailsViewModel;
             OrderItemList = orderItemListViewModel;
         }
@@ -32,24 +42,27 @@ namespace Inventory.Uwp.ViewModels.Orders
 
         public OrderItemListViewModel OrderItemList { get; }
 
-        public async Task LoadAsync(OrderDetailsArgs args)
+        public async Task LoadAsync(OrderArgs args)
         {
-            await OrderDetails.LoadAsync(args);
 
-            long orderID = args?.OrderId ?? 0;
-            if (orderID > 0)
+            long orderId = args?.OrderId ?? 0;
+            if (orderId > 0)
             {
-                await OrderItemList.LoadAsync(new OrderItemListArgs { OrderId = args.OrderId });
+                var order = await _orderService.GetOrderAsync(orderId);
+                await OrderDetails.LoadAsync(new OrderDetailsArgs { OrderId = orderId, Order = order });
+                await OrderItemList.LoadAsync(new OrderItemListArgs { OrderId = orderId, Order = order });
             }
             else
             {
-                await OrderItemList.LoadAsync(new OrderItemListArgs(), silent: true);
+                await OrderDetails.LoadAsync(new OrderDetailsArgs { OrderId = 0});
+                await OrderItemList.LoadAsync(new OrderItemListArgs { OrderId = 0}, silent: true);
             }
+
         }
 
         public void Unload()
         {
-            OrderDetails.CancelEdit();
+            //OrderDetails.CancelEdit();
             OrderDetails.Unload();
             OrderItemList.Unload();
         }

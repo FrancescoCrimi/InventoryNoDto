@@ -11,6 +11,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
@@ -28,12 +29,19 @@ using Microsoft.Extensions.Logging;
 
 namespace Inventory.Uwp.ViewModels.OrderItems
 {
-    public class OrderItemListViewModel : GenericListViewModel<OrderItem>
+    public class OrderItemListViewModel
+        //: GenericListViewModel<OrderItem>
+        : ViewModelBase
     {
         private readonly ILogger _logger;
         private readonly NavigationService _navigationService;
         private readonly WindowManagerService _windowService;
         private Order Order;
+        private string _query;
+        private ObservableCollection<OrderItem> _items;
+        private int _itemsCount;
+        private OrderItem _selectedItem;
+        private bool _isMultipleSelection;
 
         public OrderItemListViewModel(ILogger<OrderItemListViewModel> logger,
                                       NavigationService navigationService,
@@ -55,9 +63,8 @@ namespace Inventory.Uwp.ViewModels.OrderItems
         {
             ViewModelArgs = args ?? new OrderItemListArgs();
             Query = ViewModelArgs.Query;
-
             Order = ViewModelArgs.Order;
-            await Task.CompletedTask;
+            await RefreshAsync();
         }
 
         public void Unload()
@@ -110,7 +117,7 @@ namespace Inventory.Uwp.ViewModels.OrderItems
             }
         }
 
-        protected async override void OnNew()
+        protected async void OnNew()
         {
             if (IsMainView)
             {
@@ -124,7 +131,7 @@ namespace Inventory.Uwp.ViewModels.OrderItems
             StatusReady();
         }
 
-        protected async override void OnRefresh()
+        protected async void OnRefresh()
         {
             StartStatusMessage("Loading order items...");
             if (await RefreshAsync())
@@ -133,7 +140,7 @@ namespace Inventory.Uwp.ViewModels.OrderItems
             }
         }
 
-        protected async override void OnDeleteSelection()
+        protected async void OnDeleteSelection()
         {
             StatusReady();
             if (await ShowDialogAsync("Confirm Delete", "Are you sure you want to delete selected order items?", "Ok", "Cancel"))
@@ -223,5 +230,58 @@ namespace Inventory.Uwp.ViewModels.OrderItems
                     break;
             }
         }
+
+
+
+
+
+
+        public string Query
+        {
+            get => _query;
+            set => SetProperty(ref _query, value);
+        }
+
+        public ObservableCollection<OrderItem> Items
+        {
+            get => _items;
+            set => SetProperty(ref _items, value);
+        }
+
+        public int ItemsCount
+        {
+            get => _itemsCount;
+            set => SetProperty(ref _itemsCount, value);
+        }
+
+        public OrderItem SelectedItem
+        {
+            get => _selectedItem;
+            set
+            {
+                if (SetProperty(ref _selectedItem, value))
+                {
+                    if (!IsMultipleSelection)
+                    {
+                        // fix _selectedItem == null
+                        if (_selectedItem != null)
+                        {
+                            //MessageService.Send(this, "ItemSelected", _selectedItem);
+                            Messenger.Send(new ViewModelsMessage<OrderItem>("ItemSelected", _selectedItem.Id));
+                        }
+                    }
+                }
+            }
+        }
+
+        public bool IsMultipleSelection
+        {
+            get => _isMultipleSelection;
+            set => SetProperty(ref _isMultipleSelection, value);
+        }
+
+        public List<OrderItem> SelectedItems { get; protected set; }
+
+        public IndexRange[] SelectedIndexRanges { get; protected set; }
     }
 }

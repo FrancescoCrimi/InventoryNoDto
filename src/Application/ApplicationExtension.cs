@@ -24,8 +24,9 @@ namespace Inventory.Application
                 .AddInventoryInfrastructure()            
                 .AddInventoryPersistence()
                 
+                .AddTransient<DashboardService>()
                 .AddTransient<CustomerService>()
-                .AddTransient<OrderService>()
+                .AddScoped<OrderService>()
                 .AddTransient<ProductService>();
         }
     }

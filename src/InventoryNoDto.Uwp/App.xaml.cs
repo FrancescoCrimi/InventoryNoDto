@@ -46,7 +46,7 @@ using Inventory.Application;
 
 namespace InventoryNoDto.Uwp
 {
-    sealed partial class App : Windows.UI.Xaml.Application
+    public sealed partial class App : Windows.UI.Xaml.Application
     {
         public App()
         {
@@ -56,17 +56,17 @@ namespace InventoryNoDto.Uwp
             Ioc.Default.ConfigureServices(ConfigureServices());
         }
 
-        protected async override void OnActivated(IActivatedEventArgs e)
-        {
-            await Ioc.Default.GetService<ActivationService>().ActivateAsync(e);
-        }
-
         protected async override void OnLaunched(LaunchActivatedEventArgs e)
         {
             if (!e.PrelaunchActivated)
             {
                 await Ioc.Default.GetService<ActivationService>().ActivateAsync(e);
             }
+        }
+
+        protected async override void OnActivated(IActivatedEventArgs e)
+        {
+            await Ioc.Default.GetService<ActivationService>().ActivateAsync(e);
         }
 
         private void OnSuspending(object sender, SuspendingEventArgs e)
@@ -85,10 +85,10 @@ namespace InventoryNoDto.Uwp
 
             // Default Activation Handler
             .AddTransient<ActivationHandler<IActivatedEventArgs>, DefaultActivationHandler>()
-
-        // Other Activation Handlers
-
-        // Services
+        
+            // Other Activation Handlers
+        
+            // Services
             .AddSingleton<ActivationService>()
             .AddScoped<NavigationService>()
             .AddSingleton<WindowManagerService>()
@@ -114,7 +114,7 @@ namespace InventoryNoDto.Uwp
             .AddTransient<ProductDetailsViewModel>()
             .AddTransient<ProductsViewModel>()
             .AddTransient<OrderDetailsViewModel>()
-            .AddTransient<OrderDetailsWithItemsViewModel>()
+            .AddTransient<OrderViewModel>()
             .AddTransient<OrderListViewModel>()
             .AddTransient<OrdersViewModel>()
             .AddTransient<OrderItemDetailsViewModel>()

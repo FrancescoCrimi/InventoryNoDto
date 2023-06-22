@@ -12,6 +12,7 @@
 using System;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.Messaging;
+using Inventory.Application;
 using Inventory.Domain.OrderAggregate;
 using Inventory.Infrastructure.Logging;
 using Inventory.Uwp.ViewModels.Common;
@@ -24,14 +25,17 @@ namespace Inventory.Uwp.ViewModels.Orders
     public class OrdersViewModel : ViewModelBase
     {
         private readonly ILogger _logger;
+        private readonly OrderService _orderService;
 
         public OrdersViewModel(ILogger<OrdersViewModel> logger,
+                               OrderService orderService,
                                OrderListViewModel orderListViewModel,
                                OrderDetailsViewModel orderDetailsViewModel,
                                OrderItemListViewModel orderItemListViewModel)
             : base()
         {
             _logger = logger;
+            _orderService = orderService;
             OrderList = orderListViewModel;
             OrderDetails = orderDetailsViewModel;
             OrderItemList = orderItemListViewModel;
@@ -56,7 +60,7 @@ namespace Inventory.Uwp.ViewModels.Orders
 
         public void Unload()
         {
-            OrderDetails.CancelEdit();
+            //OrderDetails.CancelEdit();
             OrderList.Unload();
         }
 
@@ -90,46 +94,28 @@ namespace Inventory.Uwp.ViewModels.Orders
 
         private async Task OnItemSelected(long id)
         {
-            if (OrderDetails.IsEditMode)
-            {
-                StatusReady();
-                OrderDetails.CancelEdit();
-            }
+            //if (OrderDetails.IsEditMode)
+            //{
+            //    StatusReady();
+            //    OrderDetails.CancelEdit();
+            //}
             OrderItemList.IsMultipleSelection = false;
             if (!OrderList.IsMultipleSelection)
             {
                 if (id != 0)
                 {
-                    await PopulateDetails(id);
-                    await PopulateOrderItems(id);
-                }
-            }
-        }
+                    try
+                    {
+                        var order = await _orderService.GetOrderAsync(id);
+                        await OrderDetails.LoadAsync(new OrderDetailsArgs { Order = order, OrderId = order.Id });
+                        await OrderItemList.LoadAsync(new OrderItemListArgs { Order = order }, silent: true);
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(LogEvents.LoadOrder, ex, "Load OrderItems");
+                    }
 
-        private async Task PopulateDetails(long id)
-        {
-            try
-            {
-                await OrderDetails.LoadAsync(new OrderDetailsArgs { OrderId = id });
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(LogEvents.LoadDetails, ex, "Load Details");
-            }
-        }
-
-        private async Task PopulateOrderItems(long id)
-        {
-            try
-            {
-                if (id != 0)
-                {
-                    await OrderItemList.LoadAsync(new OrderItemListArgs { OrderId = id }, silent: true);
                 }
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(LogEvents.LoadOrderItems, ex, "Load OrderItems");
             }
         }
     }

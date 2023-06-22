@@ -116,6 +116,7 @@
     <RestoreProjectStyle>PackageReference</RestoreProjectStyle>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="Activation\IActivationHandler.cs" />
     <Compile Include="Activation\ActivationHandler.cs" />
     <Compile Include="Activation\DefaultActivationHandler.cs" />
     <Compile Include="App.xaml.cs">
@@ -157,9 +158,10 @@
     <Compile Include="ViewModels\OrderItems\OrderItemListArgs.cs" />
     <Compile Include="ViewModels\OrderItems\OrderItemListViewModel.cs" />
     <Compile Include="ViewModels\OrderItems\OrderItemsViewModel.cs" />
+    <Compile Include="ViewModels\Orders\OrderArgs.cs" />
     <Compile Include="ViewModels\Orders\OrderDetailsArgs.cs" />
     <Compile Include="ViewModels\Orders\OrderDetailsViewModel.cs" />
-    <Compile Include="ViewModels\Orders\OrderDetailsWithItemsViewModel.cs" />
+    <Compile Include="ViewModels\Orders\OrderViewModel.cs" />
     <Compile Include="ViewModels\Orders\OrderListArgs.cs" />
     <Compile Include="ViewModels\Orders\OrderListViewModel.cs" />
     <Compile Include="ViewModels\Orders\OrdersViewModel.cs" />
@@ -251,17 +253,14 @@
     <Compile Include="Views\Orders\Details\OrdersDetailsControl.xaml.cs">
       <DependentUpon>OrdersDetailsControl.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Views\Orders\Details\OrdersOrderItemsControl.xaml.cs">
-      <DependentUpon>OrdersOrderItemsControl.xaml</DependentUpon>
+    <Compile Include="Views\Orders\Details\OrderItemsListControl.xaml.cs">
+      <DependentUpon>OrderItemsListControl.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\Orders\List\OrdersListControl.xaml.cs">
       <DependentUpon>OrdersListControl.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\Orders\OrdersPage.xaml.cs">
       <DependentUpon>OrdersPage.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Views\Order\Details\OrderDetailsControl.xaml.cs">
-      <DependentUpon>OrderDetailsControl.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\Order\OrderPage.xaml.cs">
       <DependentUpon>OrderPage.xaml</DependentUpon>
@@ -468,7 +467,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="Views\Orders\Details\OrdersOrderItemsControl.xaml">
+    <Page Include="Views\Orders\Details\OrderItemsListControl.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
@@ -477,10 +476,6 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="Views\Orders\OrdersPage.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="Views\Order\Details\OrderDetailsControl.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
@@ -525,6 +520,7 @@
       <SubType>Designer</SubType>
     </Page>
   </ItemGroup>
+  <ItemGroup />
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '14.0' ">
     <VisualStudioVersion>14.0</VisualStudioVersion>
   </PropertyGroup>

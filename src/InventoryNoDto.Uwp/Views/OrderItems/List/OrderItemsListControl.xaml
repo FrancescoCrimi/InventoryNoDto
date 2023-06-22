@@ -111,14 +111,17 @@
                           ItemTemplate="{StaticResource ItemTemplate}"
                           IsMultipleSelection="{x:Bind ViewModel.IsMultipleSelection, Mode=TwoWay}"
                           ItemsCount="{x:Bind ViewModel.ItemsCount, Mode=OneWay}"
+                          Query="{x:Bind ViewModel.Query, Mode=TwoWay}"
+                          />
+    <!--
                           NewCommand="{x:Bind ViewModel.NewCommand}"
                           RefreshCommand="{x:Bind ViewModel.RefreshCommand}"
-                          Query="{x:Bind ViewModel.Query, Mode=TwoWay}"
                           QuerySubmittedCommand="{x:Bind ViewModel.RefreshCommand}"
                           StartSelectionCommand="{x:Bind ViewModel.StartSelectionCommand}"
                           CancelSelectionCommand="{x:Bind ViewModel.CancelSelectionCommand}"
                           SelectItemsCommand="{x:Bind ViewModel.SelectItemsCommand}"
                           DeselectItemsCommand="{x:Bind ViewModel.DeselectItemsCommand}"
-                          DeleteCommand="{x:Bind ViewModel.DeleteSelectionCommand}" />
+                          DeleteCommand="{x:Bind ViewModel.DeleteSelectionCommand}"
+    -->
 
 </UserControl>

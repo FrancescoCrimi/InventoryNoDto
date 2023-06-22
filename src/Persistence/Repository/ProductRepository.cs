@@ -1,4 +1,5 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
+// Copyright (c) 2023 Francesco Crimi francrim@gmail.com
 // This code is licensed under the MIT License (MIT).
 // THE CODE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
 // INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
@@ -21,12 +22,12 @@ namespace Inventory.Persistence.Repository
 {
     internal class ProductRepository : IProductRepository
     {
-        private AppDbContext _dbContext = null;
-
-        public ProductRepository(AppDbContext dbContext)
+        public ProductRepository(UnitOfWork unitOfWork)
         {
-            _dbContext = dbContext;
+            DbContext = unitOfWork.DbContext;
         }
+
+        private AppDbContext DbContext { get; set; }
 
         public async Task<IList<Product>> GetProductsAsync(int skip, int take, DataRequest<Product> request)
         {
@@ -34,7 +35,7 @@ namespace Inventory.Persistence.Repository
 
             // Execute
             var records = await items.Skip(skip).Take(take)
-                //.AsNoTracking()
+                .AsNoTracking()
                 .ToListAsync();
 
             return records;
@@ -58,7 +59,7 @@ namespace Inventory.Persistence.Repository
 
         public async Task<int> GetProductsCountAsync(DataRequest<Product> request)
         {
-            IQueryable<Product> items = _dbContext.Products;
+            IQueryable<Product> items = DbContext.Products;
 
             // Query
             if (!string.IsNullOrEmpty(request.Query))
@@ -77,47 +78,47 @@ namespace Inventory.Persistence.Repository
 
         public async Task<Product> GetProductAsync(long id)
         {
-            return await _dbContext.Products.Where(r => r.Id == id).FirstOrDefaultAsync();
+            return await DbContext.Products.Where(r => r.Id == id).FirstOrDefaultAsync();
         }
 
         public async Task<int> UpdateProductAsync(Product product)
         {
             if (product.Id > 0)
             {
-                _dbContext.Entry(product).State = EntityState.Modified;
+                DbContext.Entry(product).State = EntityState.Modified;
             }
             else
             {
                 product.Id = UIDGenerator.Next(6);
                 product.CreatedOn = DateTime.UtcNow;
-                _dbContext.Entry(product).State = EntityState.Added;
+                DbContext.Entry(product).State = EntityState.Added;
             }
             product.LastModifiedOn = DateTime.UtcNow;
             product.SearchTerms = product.BuildSearchTerms();
-            return await _dbContext.SaveChangesAsync();
+            return await DbContext.SaveChangesAsync();
         }
 
         public async Task<int> DeleteProductsAsync(params Product[] products)
         {
-            _dbContext.Products.RemoveRange(products);
-            return await _dbContext.SaveChangesAsync();
+            DbContext.Products.RemoveRange(products);
+            return await DbContext.SaveChangesAsync();
         }
 
 
         public async Task<List<Category>> GetCategoriesAsync()
         {
-            return await _dbContext.Categories.AsNoTracking().ToListAsync();
+            return await DbContext.Categories.AsNoTracking().ToListAsync();
         }
 
         public async Task<List<TaxType>> GetTaxTypesAsync()
         {
-            return await _dbContext.TaxTypes.AsNoTracking().ToListAsync();
+            return await DbContext.TaxTypes.AsNoTracking().ToListAsync();
         }
 
 
         private IQueryable<Product> GetProducts(DataRequest<Product> request)
         {
-            IQueryable<Product> items = _dbContext.Products;
+            IQueryable<Product> items = DbContext.Products;
 
             // Query
             if (!string.IsNullOrEmpty(request.Query))
@@ -156,9 +157,9 @@ namespace Inventory.Persistence.Repository
         {
             if (disposing)
             {
-                if (_dbContext != null)
+                if (DbContext != null)
                 {
-                    _dbContext.Dispose();
+                    DbContext.Dispose();
                 }
             }
         }

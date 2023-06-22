@@ -1,4 +1,5 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
+// Copyright (c) 2023 Francesco Crimi francrim@gmail.com
 // This code is licensed under the MIT License (MIT).
 // THE CODE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
 // INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
@@ -21,12 +22,12 @@ namespace Inventory.Persistence.Repository
 {
     internal class CustomerRepository : ICustomerRepository
     {
-        private readonly AppDbContext _dbContext;
-
-        public CustomerRepository(AppDbContext dbContext)
+        public CustomerRepository(UnitOfWork unitOfWork)
         {
-            _dbContext = dbContext;
+            DbContext = unitOfWork.DbContext;
         }
+
+        private AppDbContext DbContext { get; set; }
 
         public async Task<IList<Customer>> GetCustomersAsync(int skip, int take, DataRequest<Customer> request)
         {
@@ -55,7 +56,7 @@ namespace Inventory.Persistence.Repository
                 //    LastModifiedOn = r.LastModifiedOn,
                 //    Thumbnail = r.Thumbnail
                 //})
-                //.AsNoTracking()
+                .AsNoTracking()
                 .ToListAsync();
 
             return records;
@@ -79,7 +80,7 @@ namespace Inventory.Persistence.Repository
 
         public async Task<int> GetCustomersCountAsync(DataRequest<Customer> request)
         {
-            IQueryable<Customer> items = _dbContext.Customers;
+            IQueryable<Customer> items = DbContext.Customers;
 
             // Query
             if (!string.IsNullOrEmpty(request.Query))
@@ -98,7 +99,7 @@ namespace Inventory.Persistence.Repository
 
         public async Task<Customer> GetCustomerAsync(long id)
         {
-            var cust = await _dbContext.Customers
+            var cust = await DbContext.Customers
                 .Where(r => r.Id == id)
                 .Include(c => c.Country)
                 .FirstOrDefaultAsync();
@@ -109,36 +110,36 @@ namespace Inventory.Persistence.Repository
         {
             if (customer.Id > 0)
             {
-                _dbContext.Entry(customer).State = EntityState.Modified;
+                DbContext.Entry(customer).State = EntityState.Modified;
             }
             else
             {
                 customer.Id = UIDGenerator.Next();
                 customer.CreatedOn = DateTime.UtcNow;
-                _dbContext.Entry(customer).State = EntityState.Added;
+                DbContext.Entry(customer).State = EntityState.Added;
             }
             customer.LastModifiedOn = DateTime.UtcNow;
             customer.SearchTerms = customer.BuildSearchTerms();
-            var res = await _dbContext.SaveChangesAsync();
+            var res = await DbContext.SaveChangesAsync();
             return res;
         }
 
         public async Task<int> DeleteCustomersAsync(params Customer[] customers)
         {
-            _dbContext.Customers.RemoveRange(customers);
-            return await _dbContext.SaveChangesAsync();
+            DbContext.Customers.RemoveRange(customers);
+            return await DbContext.SaveChangesAsync();
         }
 
 
         public async Task<List<Country>> GetCountriesAsync()
         {
-            return await _dbContext.Countries.AsNoTracking().ToListAsync();
+            return await DbContext.Countries.AsNoTracking().ToListAsync();
         }
 
 
         private IQueryable<Customer> GetCustomers(DataRequest<Customer> request)
         {
-            IQueryable<Customer> items = _dbContext.Customers;
+            IQueryable<Customer> items = DbContext.Customers;
 
             // Query
             if (!string.IsNullOrEmpty(request.Query))
@@ -177,9 +178,9 @@ namespace Inventory.Persistence.Repository
         {
             if (disposing)
             {
-                if (_dbContext != null)
+                if (DbContext != null)
                 {
-                    _dbContext.Dispose();
+                    DbContext = null;
                 }
             }
         }

@@ -37,5 +37,6 @@ namespace Inventory.Infrastructure.Logging
         public static EventId LoadProducts = new EventId(1018, "Load Products");
         public static EventId LoadOrderItems = new EventId(1019, "Load OrderItems");
         public static EventId Settings = new EventId(1020, "Settings");
+        public static EventId LoadOrder = new EventId(1021, "Load Order");
     }
 }

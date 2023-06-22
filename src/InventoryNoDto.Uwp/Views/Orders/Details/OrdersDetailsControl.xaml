@@ -7,8 +7,8 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d"
-             d:DesignHeight="300"
-             d:DesignWidth="400">
+             d:DesignHeight="600"
+             d:DesignWidth="800">
 
     <UserControl.Resources>
         <DataTemplate x:Key="DetailsTemplate"
@@ -19,26 +19,26 @@
                                    RowSpacing="12">
 
                 <libcontrols:FormTextBox Header="Ship Address"
-                                         Text="{x:Bind EditableItem.ShipAddress, Mode=TwoWay}" />
+                                         Text="{x:Bind Item.ShipAddress, Mode=TwoWay}" />
 
                 <libcontrols:FormTextBox Header="Ship City"
-                                         Text="{x:Bind EditableItem.ShipCity, Mode=TwoWay}" />
+                                         Text="{x:Bind Item.ShipCity, Mode=TwoWay}" />
 
                 <libcontrols:FluidGrid Columns="2"
                                        ColumnSpacing="6"
                                        RowSpacing="12"
                                        MinColumnWidth="120">
                     <libcontrols:FormTextBox Header="Ship Postal Code"
-                                             Text="{x:Bind EditableItem.ShipPostalCode, Mode=TwoWay}" />
+                                             Text="{x:Bind Item.ShipPostalCode, Mode=TwoWay}" />
                     <libcontrols:FormTextBox Header="Ship Region"
-                                             Text="{x:Bind EditableItem.ShipRegion, Mode=TwoWay}" />
+                                             Text="{x:Bind Item.ShipRegion, Mode=TwoWay}" />
                 </libcontrols:FluidGrid>
 
                 <libcontrols:FormComboBox Name="ShipCountryComboBox"
                                           Header="Ship Country"
                                           VerticalAlignment="Top"
                                           ItemsSource="{x:Bind Countries}"
-                                          SelectedItem="{x:Bind EditableItem.ShipCountry, Mode=TwoWay}"
+                                          SelectedItem="{x:Bind Item.ShipCountry, Mode=TwoWay}"
                                           DisplayMemberPath="Name" />
                 <!--
                                           SelectedValue="{x:Bind EditableItem.ShipCountryId, Mode=TwoWay}"
@@ -48,7 +48,7 @@
                 <libcontrols:FormComboBox Name="StatusComboBox"
                                           Header="Status"
                                           ItemsSource="{x:Bind OrderStatuses}"
-                                          SelectedItem="{x:Bind EditableItem.Status, Mode=TwoWay}"
+                                          SelectedItem="{x:Bind Item.Status, Mode=TwoWay}"
                                           DisplayMemberPath="Name" />
                 <!--
                 // Selectvalue con binding xxx.xxx funziona solo al focus del controllo o aggiornando itemsource
@@ -60,9 +60,9 @@
                 <libcontrols:FormComboBox Name="PaymentTypeComboBox"
                                           Header="Payment Type"
                                           ItemsSource="{x:Bind PaymentTypes}"
-                                          SelectedItem="{x:Bind EditableItem.PaymentType, Mode=TwoWay}"
+                                          SelectedItem="{x:Bind Item.PaymentType, Mode=TwoWay}"
                                           DisplayMemberPath="Name"
-                                          Visibility="{x:Bind EditableItem.CanEditPayment, Mode=OneWay}" />
+                                          Visibility="{x:Bind Item.CanEditPayment, Mode=OneWay}" />
                 <!-- 
                                           SelectedValue="{x:Bind EditableItem.PaymentTypeId, Mode=TwoWay, Converter={StaticResource NullableInt64Converter}}"
                                           SelectedValuePath="Id"
@@ -73,21 +73,21 @@
                                        RowSpacing="12"
                                        MinColumnWidth="120">
                     <libcontrols:FormCalendarDatePicker Header="Shipped Date"
-                                                        Date="{x:Bind EditableItem.ShippedDate, Mode=TwoWay}"
-                                                        MinDate="{x:Bind EditableItem.OrderDate, Mode=OneWay, Converter={StaticResource DateTimeOffsetConverter}}"
-                                                        Visibility="{x:Bind EditableItem.CanEditShipping, Mode=OneWay}" />
+                                                        Date="{x:Bind Item.ShippedDate, Mode=TwoWay}"
+                                                        MinDate="{x:Bind Item.OrderDate, Mode=OneWay, Converter={StaticResource DateTimeOffsetConverter}}"
+                                                        Visibility="{x:Bind Item.CanEditShipping, Mode=OneWay}" />
                     <libcontrols:FormComboBox Header="Ship Via"
                                               ItemsSource="{x:Bind Shippers}"
-                                              SelectedValue="{x:Bind EditableItem.ShipperId, Mode=TwoWay, Converter={StaticResource NullableInt64Converter}}"
+                                              SelectedValue="{x:Bind Item.ShipperId, Mode=TwoWay, Converter={StaticResource NullableInt64Converter}}"
                                               SelectedValuePath="Id"
                                               DisplayMemberPath="Name"
-                                              Visibility="{x:Bind EditableItem.CanEditShipping, Mode=OneWay}" />
+                                              Visibility="{x:Bind Item.CanEditShipping, Mode=OneWay}" />
                 </libcontrols:FluidGrid>
 
                 <libcontrols:FormCalendarDatePicker Header="Delivered Date"
-                                                    Date="{x:Bind EditableItem.DeliveredDate, Mode=TwoWay}"
-                                                    MinDate="{x:Bind EditableItem.ShippedDate, Mode=OneWay, Converter={StaticResource DateTimeOffsetConverter}}"
-                                                    Visibility="{x:Bind EditableItem.CanEditDelivery, Mode=OneWay}" />
+                                                    Date="{x:Bind Item.DeliveredDate, Mode=TwoWay}"
+                                                    MinDate="{x:Bind Item.ShippedDate, Mode=OneWay, Converter={StaticResource DateTimeOffsetConverter}}"
+                                                    Visibility="{x:Bind Item.CanEditDelivery, Mode=OneWay}" />
             </libcontrols:FluidGrid>
         </DataTemplate>
     </UserControl.Resources>
@@ -110,10 +110,13 @@
                              Margin="12,6,6,6"
                              DetailsContent="{x:Bind ViewModel}"
                              DetailsTemplate="{StaticResource DetailsTemplate}"
+                             />
+        <!--
                              IsEditMode="{x:Bind ViewModel.IsEditMode, Mode=OneWay}"
                              EditCommand="{x:Bind ViewModel.EditCommand}"
                              DeleteCommand="{x:Bind ViewModel.DeleteCommand}"
                              SaveCommand="{x:Bind ViewModel.SaveCommand}"
-                             CancelCommand="{x:Bind ViewModel.CancelCommand}" />
+                             CancelCommand="{x:Bind ViewModel.CancelCommand}"
+        -->
     </Grid>
 </UserControl>

@@ -9,6 +9,7 @@
 // THE CODE OR THE USE OR OTHER DEALINGS IN THE CODE.
 
 using Inventory.Domain.CustomerAggregate;
+using Inventory.Infrastructure;
 using Inventory.Infrastructure.Common;
 using Inventory.Infrastructure.Logging;
 using Microsoft.Extensions.Logging;
@@ -19,37 +20,21 @@ using System.Threading.Tasks;
 
 namespace Inventory.Application
 {
-    public class CustomerService
+    public class CustomerService : BaseService
     {
         private readonly ILogger _logger;
+        private readonly IUnitOfWork _unitOfWork;
         private readonly ICustomerRepository _customerRepository;
-        private static List<Country> _countries;
 
         public CustomerService(ILogger<CustomerService> logger,
+                               IServiceProvider serviceProvider,
+                               IUnitOfWork unitOfWork,
                                ICustomerRepository customerRepository)
+            : base(logger, serviceProvider)
         {
             _logger = logger;
+            _unitOfWork = unitOfWork;
             _customerRepository = customerRepository;
-        }
-
-        public IEnumerable<Country> Countries
-        {
-            get
-            {
-                if (_countries == null)
-                {
-                    try
-                    {
-                        _countries = _customerRepository.GetCountriesAsync().Result;
-                    }
-                    catch (Exception ex)
-                    {
-                        _countries = new List<Country>();
-                        _logger.LogError(LogEvents.LoadCountryCodes, ex, "Load CountryCodes");
-                    }
-                }
-                return _countries;
-            }
         }
 
         public async Task<IList<Customer>> GetCustomersAsync(int index, int length, DataRequest<Customer> request)

@@ -1,4 +1,5 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
+// Copyright (c) 2023 Francesco Crimi francrim@gmail.com
 // This code is licensed under the MIT License (MIT).
 // THE CODE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
 // INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
@@ -35,10 +36,8 @@ namespace Inventory.Uwp.ViewModels.Dashboard
     public class DashboardViewModel : ViewModelBase
     {
         private readonly ILogger _logger;
+        private readonly DashboardService _dashboardService;
         private readonly NavigationService _navigationService;
-        private readonly CustomerService _customerService;
-        private readonly OrderService _orderService;
-        private readonly ProductService _productService;
         private AsyncRelayCommand _loadedCommand;
         private RelayCommand _unLoadedCommand;
         private RelayCommand<ItemClickEventArgs> _itemClickCommand;
@@ -47,17 +46,14 @@ namespace Inventory.Uwp.ViewModels.Dashboard
         private IList<Order> _orders;
 
         public DashboardViewModel(ILogger<DashboardViewModel> logger,
-                                  NavigationService navigationService,
-                                  CustomerService customerService,
-                                  OrderService orderService,
-                                  ProductService productService)
+                                  DashboardService dashboardService,
+                                  NavigationService navigationService
+            )
             : base()
         {
             _logger = logger;
+            _dashboardService = dashboardService;
             _navigationService = navigationService;
-            _customerService = customerService;
-            _orderService = orderService;
-            _productService = productService;
         }
 
         public ICommand LoadedCommand => _loadedCommand
@@ -111,7 +107,7 @@ namespace Inventory.Uwp.ViewModels.Dashboard
                 {
                     OrderByDesc = r => r.CreatedOn
                 };
-                Customers = await _customerService.GetCustomersAsync(0, 5, request);
+                Customers = await _dashboardService.GetCustomersAsync(0, 5, request);
             }
             catch (Exception ex)
             {
@@ -127,7 +123,7 @@ namespace Inventory.Uwp.ViewModels.Dashboard
                 {
                     OrderByDesc = r => r.OrderDate
                 };
-                Orders = await _orderService.GetOrdersAsync(0, 5, request);
+                Orders = await _dashboardService.GetOrdersAsync(0, 5, request);
             }
             catch (Exception ex)
             {
@@ -143,7 +139,7 @@ namespace Inventory.Uwp.ViewModels.Dashboard
                 {
                     OrderByDesc = r => r.CreatedOn
                 };
-                Products = await _productService.GetProductsAsync(0, 5, request);
+                Products = await _dashboardService.GetProductsAsync(0, 5, request);
             }
             catch (Exception ex)
             {

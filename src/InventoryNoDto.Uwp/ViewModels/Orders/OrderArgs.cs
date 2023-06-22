@@ -10,17 +10,19 @@
 // THE CODE OR THE USE OR OTHER DEALINGS IN THE CODE.
 
 using Inventory.Domain.OrderAggregate;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
-namespace Inventory.Uwp.ViewModels.Orders
+namespace InventoryNoDto.Uwp.ViewModels.Orders
 {
-    public class OrderDetailsArgs
+    public class OrderArgs
     {
-        public static OrderDetailsArgs CreateDefault() => new OrderDetailsArgs { CustomerId = 0 };
-
         public long CustomerId { get; set; }
         public long OrderId { get; set; }
         public Order Order { get; set; }
-
         public bool IsNew => OrderId == 0;
     }
 }

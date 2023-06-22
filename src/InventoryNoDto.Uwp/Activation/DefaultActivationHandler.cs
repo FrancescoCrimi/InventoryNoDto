@@ -1,4 +1,5 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
+// Copyright (c) 2023 Francesco Crimi francrim@gmail.com
 // This code is licensed under the MIT License (MIT).
 // THE CODE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
 // INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
@@ -18,11 +19,11 @@ namespace Inventory.Uwp.Activation
 {
     internal class DefaultActivationHandler : ActivationHandler<IActivatedEventArgs>
     {
-        private readonly NavigationService navigationService;
+        private readonly NavigationService _navigationService;
 
         public DefaultActivationHandler(NavigationService navigationService)
         {
-            this.navigationService = navigationService;
+            _navigationService = navigationService;
         }
 
         protected async override Task HandleInternalAsync(IActivatedEventArgs args)
@@ -34,14 +35,14 @@ namespace Inventory.Uwp.Activation
             {
                 arguments = launchArgs.Arguments;
             }
-            navigationService.Navigate(typeof(DashboardPage), arguments);
+            _navigationService.Navigate(typeof(DashboardPage), arguments);
             await Task.CompletedTask;
         }
 
         protected override bool CanHandleInternal(IActivatedEventArgs args)
         {
             // None of the ActivationHandlers has handled the app activation
-            return navigationService.Frame.Content == null;
+            return _navigationService.Frame.Content == null;
         }
     }
 }

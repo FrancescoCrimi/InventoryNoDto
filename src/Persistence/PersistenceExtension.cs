@@ -17,6 +17,7 @@ using Inventory.Infrastructure.Common;
 using Inventory.Persistence.DbContexts;
 using Inventory.Persistence.Repository;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Inventory.Persistence
@@ -30,6 +31,7 @@ namespace Inventory.Persistence
             serviceCollection.AddDbContext<SQLiteAppDbContext>(options =>
             {
                 options
+                    .ConfigureWarnings(a => a.Ignore(CoreEventId.DetachedLazyLoadingWarning))
                     .UseLazyLoadingProxies()
                     .EnableSensitiveDataLogging(true)
                     .UseSqlite(settings.SQLiteConnectionString);
@@ -62,6 +64,8 @@ namespace Inventory.Persistence
             }
 
             return serviceCollection
+                .AddScoped<UnitOfWork>()
+                .AddScoped<IUnitOfWork>((serviceprovider) => serviceprovider.GetRequiredService<UnitOfWork>())
                 .AddTransient<ICustomerRepository, CustomerRepository>()
                 .AddTransient<IOrderRepository, OrderRepository>()
                 //.AddTransient<IOrderItemRepository, OrderItemRepository>()

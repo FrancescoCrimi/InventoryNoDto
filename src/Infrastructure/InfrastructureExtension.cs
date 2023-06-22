@@ -30,7 +30,8 @@ namespace Inventory.Infrastructure
                     .AddDebug()
                     //.AddConsole()
                     .AddSqliteDatabase(serviceCollection)
-                    .AddFilter("", LogLevel.Information)
+                    // filtro generale
+                    .AddFilter("", LogLevel.Warning)
                 );
         }
 
@@ -40,12 +41,13 @@ namespace Inventory.Infrastructure
                 .AddDbContext<LogDbContext>(option =>
                 {
                     option.UseSqlite(settings.AppLogConnectionString);
-                    //option.EnableSensitiveDataLogging(true);
+                    option.EnableSensitiveDataLogging(true);
                 }, ServiceLifetime.Transient)
                 .AddSingleton<LogService>()
                 .TryAddEnumerable(ServiceDescriptor.Singleton<ILoggerProvider, CustomLoggerProvider>());
 
             return loggingBuilder
+                // aggiungi filtro anti loop solo per customProvider
                 .AddFilter<CustomLoggerProvider>("Microsoft.EntityFrameworkCore", LogLevel.None);
         }
     }

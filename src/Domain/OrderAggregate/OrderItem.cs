@@ -173,6 +173,17 @@ namespace Inventory.Domain.OrderAggregate
         }
 
 
+        private void CalculateTotal()
+        {
+            var subTotal = Quantity * UnitPrice;
+            var total = Subtotal - Discount;
+            if (TaxType != null)
+            {
+                total *= (1 + TaxType.Rate / 100m);
+            }
+        }
+
+
         private void CheckIsDraft()
         {
             isDraft = orderId == 0 || productId == 0 || taxTypeId == 0;

@@ -1,4 +1,5 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
+// Copyright (c) 2023 Francesco Crimi francrim@gmail.com
 // This code is licensed under the MIT License (MIT).
 // THE CODE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
 // INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
@@ -21,12 +22,12 @@ namespace Inventory.Persistence.Repository
 {
     internal class OrderRepository : IOrderRepository
     {
-        private readonly AppDbContext _dbContext = null;
-
-        public OrderRepository(AppDbContext dbContext)
+        public OrderRepository(UnitOfWork unitOfWork)
         {
-            _dbContext = dbContext;
+            DbContext = unitOfWork.DbContext;
         }
+
+        private AppDbContext DbContext { get; set; }
 
         public async Task<IList<Order>> GetOrdersAsync(int skip, int take, DataRequest<Order> request)
         {
@@ -34,7 +35,7 @@ namespace Inventory.Persistence.Repository
 
             // Execute
             var records = await items.Skip(skip).Take(take)
-                //.AsNoTracking()
+                .AsNoTracking()
                 .ToListAsync();
 
             return records;
@@ -58,7 +59,7 @@ namespace Inventory.Persistence.Repository
 
         public async Task<int> GetOrdersCountAsync(DataRequest<Order> request)
         {
-            IQueryable<Order> items = _dbContext.Orders;
+            IQueryable<Order> items = DbContext.Orders;
 
             // Query
             if (!string.IsNullOrEmpty(request.Query))
@@ -77,10 +78,11 @@ namespace Inventory.Persistence.Repository
 
         public async Task<Order> GetOrderAsync(long id)
         {
-            return await _dbContext.Orders.Where(r => r.Id == id)
+            return await DbContext.Orders.Where(r => r.Id == id)
                 //.Include(r => r.Customer)
                 //.Include(o => o.Status)
                 //.Include(o => o.ShipCountry)
+                //.AsNoTracking()
                 .FirstOrDefaultAsync();
         }
 
@@ -88,45 +90,45 @@ namespace Inventory.Persistence.Repository
         {
             if (order.Id > 0)
             {
-                _dbContext.Entry(order).State = EntityState.Modified;
+                DbContext.Entry(order).State = EntityState.Modified;
             }
             else
             {
                 order.Id = UIDGenerator.Next(4);
                 order.OrderDate = DateTime.UtcNow;
-                _dbContext.Entry(order).State = EntityState.Added;
+                DbContext.Entry(order).State = EntityState.Added;
             }
             order.LastModifiedOn = DateTime.UtcNow;
             order.SearchTerms = order.BuildSearchTerms();
-            return await _dbContext.SaveChangesAsync();
+            return await DbContext.SaveChangesAsync();
         }
 
         public async Task<int> DeleteOrdersAsync(params Order[] orders)
         {
-            _dbContext.Orders.RemoveRange(orders);
-            return await _dbContext.SaveChangesAsync();
+            DbContext.Orders.RemoveRange(orders);
+            return await DbContext.SaveChangesAsync();
         }
 
 
         public async Task<List<OrderStatus>> GetOrderStatusAsync()
         {
-            return await _dbContext.OrderStatuses.AsNoTracking().ToListAsync();
+            return await DbContext.OrderStatuses.AsNoTracking().ToListAsync();
         }
 
         public async Task<List<PaymentType>> GetPaymentTypesAsync()
         {
-            return await _dbContext.PaymentTypes.AsNoTracking().ToListAsync();
+            return await DbContext.PaymentTypes.AsNoTracking().ToListAsync();
         }
 
         public async Task<List<Shipper>> GetShippersAsync()
         {
-            return await _dbContext.Shippers.AsNoTracking().ToListAsync();
+            return await DbContext.Shippers.AsNoTracking().ToListAsync();
         }
 
 
         private IQueryable<Order> GetOrders(DataRequest<Order> request)
         {
-            IQueryable<Order> items = _dbContext.Orders;
+            IQueryable<Order> items = DbContext.Orders;
 
             // Query
             if (!string.IsNullOrEmpty(request.Query))
@@ -165,9 +167,9 @@ namespace Inventory.Persistence.Repository
         {
             if (disposing)
             {
-                if (_dbContext != null)
+                if (DbContext != null)
                 {
-                    _dbContext.Dispose();
+                    DbContext.Dispose();
                 }
             }
         }

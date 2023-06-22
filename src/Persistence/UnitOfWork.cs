@@ -1,49 +1,70 @@
-﻿using Inventory.Infrastructure;
+﻿// Copyright (c) 2023 Francesco Crimi francrim@gmail.com
+// This code is licensed under the MIT License (MIT).
+// THE CODE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+// INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+// IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+// DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+// TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH
+// THE CODE OR THE USE OR OTHER DEALINGS IN THE CODE.
+
+using Inventory.Infrastructure;
 using Inventory.Persistence.DbContexts;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
 namespace Inventory.Persistence
 {
-    internal class UnitOfWork : IUnitOfWork<AppDbContext>, IDisposable
+    internal class UnitOfWork : IUnitOfWork, IDisposable
     {
         private bool disposedValue;
-        private AppDbContext _appDbContext;
+        private AppDbContext _dbContext;
+        private readonly ILogger _logger;
         private readonly IServiceProvider _serviceProvider;
 
-        public UnitOfWork(IServiceProvider serviceProvider)
+        public UnitOfWork(ILogger<UnitOfWork> logger, IServiceProvider serviceProvider)
         {
+            _logger = logger;
             _serviceProvider = serviceProvider;
+            ReNewDbContext();
         }
 
-        public AppDbContext Context => _appDbContext;
-
-        public void Commit()
-        {
-            throw new NotImplementedException();
-        }
-
-        public void CreateTransaction()
-        {
-            throw new NotImplementedException();
-        }
+        internal AppDbContext DbContext => _dbContext;
 
         public void Rollback()
         {
-            throw new NotImplementedException();
+            ReNewDbContext();
         }
 
         public void Save()
         {
-            throw new NotImplementedException();
+            if (_dbContext == null)
+                throw new InvalidOperationException("Unit Of Work not initialize");
+            else
+            {
+                try
+                {
+                    _dbContext?.SaveChanges();
+                }
+                catch (Exception ex)
+                {
+                    
+                    throw ex;
+                }
+            }
         }
 
-
-        private AppDbContext GetNewDbContext()
+        private void ReNewDbContext()
         {
-            return  _serviceProvider.GetService<AppDbContext>();
+            if (_dbContext != null)
+            {
+                _dbContext.Dispose();
+                _dbContext = null;
+            }
+            _dbContext = _serviceProvider.GetService<AppDbContext>();
         }
 
         protected virtual void Dispose(bool disposing)
@@ -53,6 +74,11 @@ namespace Inventory.Persistence
                 if (disposing)
                 {
                     // TODO: eliminare lo stato gestito (oggetti gestiti)
+                    if( _dbContext != null)
+                    {
+                        _dbContext.Dispose();
+                        _dbContext = null;
+                    }
                 }
 
                 // TODO: liberare risorse non gestite (oggetti non gestiti) ed eseguire l'override del finalizzatore

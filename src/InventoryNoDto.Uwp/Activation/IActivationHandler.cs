@@ -9,18 +9,16 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH
 // THE CODE OR THE USE OR OTHER DEALINGS IN THE CODE.
 
-using Inventory.Domain.OrderAggregate;
+using System.Threading.Tasks;
 
-namespace Inventory.Uwp.ViewModels.Orders
+namespace Inventory.Uwp.Activation
 {
-    public class OrderDetailsArgs
+    // For more information on understanding and extending activation flow see
+    // https://github.com/microsoft/TemplateStudio/blob/main/docs/UWP/activation.md
+    internal interface IActivationHandler
     {
-        public static OrderDetailsArgs CreateDefault() => new OrderDetailsArgs { CustomerId = 0 };
+        bool CanHandle(object args);
 
-        public long CustomerId { get; set; }
-        public long OrderId { get; set; }
-        public Order Order { get; set; }
-
-        public bool IsNew => OrderId == 0;
+        Task HandleAsync(object args);
     }
 }

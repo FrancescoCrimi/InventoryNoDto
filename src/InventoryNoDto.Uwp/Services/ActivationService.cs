@@ -24,13 +24,13 @@ namespace Inventory.Uwp.Services
     {
         private readonly ILogger _logger;
         private readonly ActivationHandler<IActivatedEventArgs> _defaultHandler;
-        private readonly IEnumerable<ActivationHandler> _activationHandlers;
+        private readonly IEnumerable<IActivationHandler> _activationHandlers;
         private readonly AppSettings _appSettings;
         private object _lastActivationArgs;
 
         public ActivationService(ILogger<ActivationService> logger,
                                  ActivationHandler<IActivatedEventArgs> defaultHandler,
-                                 IEnumerable<ActivationHandler> activationHandlers,
+                                 IEnumerable<IActivationHandler> activationHandlers,
                                  AppSettings appSettings)
         {
             _logger = logger;

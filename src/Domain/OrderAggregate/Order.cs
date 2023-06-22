@@ -9,13 +9,13 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH
 // THE CODE OR THE USE OR OTHER DEALINGS IN THE CODE.
 
+using Inventory.Domain.CustomerAggregate;
+using Inventory.Domain.ProductAggregate;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
-using Inventory.Domain.CustomerAggregate;
-using Inventory.Domain.ProductAggregate;
 
 namespace Inventory.Domain.OrderAggregate
 {
@@ -39,6 +39,12 @@ namespace Inventory.Domain.OrderAggregate
         private long shipCountryId;
         private long? shipperId;
         private long statusId;
+        private PaymentType paymentType;
+        private Customer customer;
+        private Shipper shipper;
+        private Country shipCountry;
+        private OrderStatus status;
+        private ObservableCollection<OrderItem> orderItems;
 
         #endregion
 
@@ -47,7 +53,7 @@ namespace Inventory.Domain.OrderAggregate
 
         public Order()
         {
-            OrderItems = new ObservableCollection<OrderItem>();
+            orderItems = new ObservableCollection<OrderItem>();
         }
 
         #endregion
@@ -142,12 +148,37 @@ namespace Inventory.Domain.OrderAggregate
             set => SetProperty(ref statusId, value);
         }
 
-        public virtual Customer Customer { get; set; }
-        public virtual PaymentType PaymentType { get; set; }
-        public virtual Shipper Shipper { get; set; }
-        public virtual Country ShipCountry { get; set; }
-        public virtual OrderStatus Status { get; set; }
-        public virtual ObservableCollection<OrderItem> OrderItems { get; set; }
+
+        public virtual Customer Customer
+        {
+            get => customer;
+            set => SetProperty(ref customer, value);
+        }
+        public virtual PaymentType PaymentType
+        {
+            get => paymentType;
+            set => SetProperty(ref paymentType, value);
+        }
+        public virtual Shipper Shipper
+        {
+            get => shipper;
+            set => SetProperty(ref shipper, value);
+        }
+        public virtual Country ShipCountry
+        {
+            get => shipCountry;
+            set => SetProperty(ref shipCountry, value);
+        }
+        public virtual OrderStatus Status
+        {
+            get => status;
+            set => SetProperty(ref status, value);
+        }
+        public virtual ObservableCollection<OrderItem> OrderItems
+        {
+            get => orderItems;
+            set => orderItems = value;
+        }
 
         #endregion
 
@@ -236,8 +267,8 @@ namespace Inventory.Domain.OrderAggregate
 
         public bool Equals(Order other)
         {
-            return !(other is null) &&
-                   Id == other.Id;
+            return !(other is null)
+                && Id == other.Id;
         }
 
         public override int GetHashCode()
