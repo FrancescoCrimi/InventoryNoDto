@@ -257,29 +257,23 @@ namespace Inventory.Domain.CustomerAggregate
         #region Equals
 
         public override bool Equals(object obj)
-        {
-            return Equals(obj as Customer);
-        }
+            => Equals(obj as Customer);
 
         public bool Equals(Customer other)
         {
-            return !(other is null) &&
-                   Id == other.Id;
+            if (other is null)
+                return false;
+            if (Id != 0 && other.Id != 0)
+                return Id == other.Id;
+            return base.Equals(other);
         }
 
         public override int GetHashCode()
         {
-            return HashCode.Combine(Id);
-        }
-
-        public static bool operator ==(Customer left, Customer right)
-        {
-            return EqualityComparer<Customer>.Default.Equals(left, right);
-        }
-
-        public static bool operator !=(Customer left, Customer right)
-        {
-            return !(left == right);
+            if (Id == 0)
+                return base.GetHashCode();
+            else
+                return HashCode.Combine(Id);
         }
 
         #endregion

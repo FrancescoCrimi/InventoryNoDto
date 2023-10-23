@@ -19,6 +19,7 @@ using Inventory.Application;
 using Inventory.Domain.ProductAggregate;
 using Inventory.Infrastructure.Logging;
 using Inventory.Uwp.Common;
+using Inventory.Uwp.Contracts.Services;
 using Inventory.Uwp.Services;
 using Inventory.Uwp.ViewModels.Common;
 using Inventory.Uwp.ViewModels.Message;
@@ -33,8 +34,8 @@ namespace Inventory.Uwp.ViewModels.Products
         private readonly FilePickerService _filePickerService;
 
         public ProductDetailsViewModel(ILogger<ProductDetailsViewModel> logger,
-                                       NavigationService navigationService,
-                                       WindowManagerService windowService,
+                                       INavigationService navigationService,
+                                       IWindowManagerService windowService,
                                        ProductService productService,
                                        FilePickerService filePickerService)
             : base(navigationService, windowService)
@@ -50,7 +51,15 @@ namespace Inventory.Uwp.ViewModels.Products
 
         public string TitleEdit => Item == null ? "Product" : $"{Item.Name}";
 
-        public override bool ItemIsNew => Item?.IsNew ?? true;
+        public override bool ItemIsNew
+        {
+            get
+            {
+                // TODO: controllare il funzionamento di CancelEdit
+                //return Item?.IsNew ?? true;
+                return Item?.IsNew ?? false;
+            }
+        }
 
         public ProductDetailsArgs ViewModelArgs
         {

@@ -10,6 +10,7 @@
 // THE CODE OR THE USE OR OTHER DEALINGS IN THE CODE.
 
 using System;
+using System.ServiceModel.Channels;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.Messaging;
 using Inventory.Application;
@@ -25,17 +26,17 @@ namespace Inventory.Uwp.ViewModels.Orders
     public class OrdersViewModel : ViewModelBase
     {
         private readonly ILogger _logger;
-        private readonly OrderService _orderService;
+        //private readonly OrderService _orderService;
 
         public OrdersViewModel(ILogger<OrdersViewModel> logger,
-                               OrderService orderService,
+                               //OrderService orderService,
                                OrderListViewModel orderListViewModel,
                                OrderDetailsViewModel orderDetailsViewModel,
                                OrderItemListViewModel orderItemListViewModel)
             : base()
         {
             _logger = logger;
-            _orderService = orderService;
+            //_orderService = orderService;
             OrderList = orderListViewModel;
             OrderDetails = orderDetailsViewModel;
             OrderItemList = orderItemListViewModel;
@@ -60,37 +61,54 @@ namespace Inventory.Uwp.ViewModels.Orders
 
         public void Unload()
         {
-            //OrderDetails.CancelEdit();
+            OrderDetails.CancelEdit();
             OrderList.Unload();
         }
 
         public void Subscribe()
         {
-            Messenger.Register<ViewModelsMessage<Order>>(this, OnMessage);
+            //Messenger.Register<ViewModelsMessage<Order>>(this, OnMessage);
+            OrderList.SelectedItemEvent += OnOrderListSelectedItem;
+
             OrderList.Subscribe();
             OrderDetails.Subscribe();
             OrderItemList.Subscribe();
+
+            OrderDetails.CurrentOrderEvent += OnOrderDetailsCurrentOrderEvent;
         }
 
         public void Unsubscribe()
         {
-            Messenger.UnregisterAll(this);
+            //Messenger.UnregisterAll(this);
+            OrderList.SelectedItemEvent -= OnOrderListSelectedItem;
+
             OrderList.Unsubscribe();
             OrderDetails.Unsubscribe();
             OrderItemList.Unsubscribe();
+
+            OrderDetails.CurrentOrderEvent -= OnOrderDetailsCurrentOrderEvent;
         }
 
-        private async void OnMessage(object recipient, ViewModelsMessage<Order> message)
+        private async void OnOrderListSelectedItem(long id)
         {
-            if (message.Value == "ItemSelected")
+            if (id != 0)
             {
-                if (message.Id != 0)
-                {
-                    //TODO: rendere il metodo OnItemSelected cancellabile
-                    await OnItemSelected(message.Id);
-                }
+                //TODO: rendere il metodo OnItemSelected cancellabile
+                await OnItemSelected(id);
             }
         }
+
+        //private async void OnMessage(object recipient, ViewModelsMessage<Order> message)
+        //{
+        //    if (message.Value == "ItemSelected")
+        //    {
+        //        if (message.Id != 0)
+        //        {
+        //            //TODO: rendere il metodo OnItemSelected cancellabile
+        //            await OnItemSelected(message.Id);
+        //        }
+        //    }
+        //}
 
         private async Task OnItemSelected(long id)
         {
@@ -106,16 +124,24 @@ namespace Inventory.Uwp.ViewModels.Orders
                 {
                     try
                     {
-                        var order = await _orderService.GetOrderAsync(id);
-                        await OrderDetails.LoadAsync(new OrderDetailsArgs { Order = order, OrderId = order.Id });
-                        await OrderItemList.LoadAsync(new OrderItemListArgs { Order = order }, silent: true);
+                        //var order = await _orderService.GetOrderAsync(id);
+                        await OrderDetails.LoadAsync(new OrderDetailsArgs { /*Order = order,*/ OrderId = id });
+                        //await OrderItemList.LoadAsync(new OrderItemListArgs { Order = order }, silent: true);
                     }
                     catch (Exception ex)
                     {
                         _logger.LogError(LogEvents.LoadOrder, ex, "Load OrderItems");
                     }
-
                 }
+            }
+        }
+
+        private async void OnOrderDetailsCurrentOrderEvent(Order order)
+        {
+            OrderItemList.IsMultipleSelection = false;
+            if (!OrderList.IsMultipleSelection)
+            {
+                await OrderItemList.LoadAsync(new OrderItemListArgs { Order = order }, silent: true);
             }
         }
     }

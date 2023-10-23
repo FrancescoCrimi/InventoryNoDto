@@ -9,55 +9,143 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH
 // THE CODE OR THE USE OR OTHER DEALINGS IN THE CODE.
 
+using Inventory.Uwp.Contracts.Services;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Windows.UI;
+using Windows.UI.ViewManagement;
 using Windows.UI.WindowManagement;
+using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Hosting;
 
 namespace Inventory.Uwp.Services
 {
-    public class WindowManagerService
+    public class WindowManagerService : IWindowManagerService, IDisposable
     {
-        private readonly ILogger<WindowManagerService> logger;
-        private readonly Dictionary<UIContext, AppWindow> appWindows;
+        private static readonly Dictionary<UIContext, AppWindow> _appWindows
+            = new Dictionary<UIContext, AppWindow>();
 
-        public WindowManagerService(ILogger<WindowManagerService> logger)
+        private readonly ILogger _logger;
+        private readonly IServiceScopeFactory _serviceScopeFactory;
+        private IServiceScope _scope;
+        private AppWindow _appWindow;
+        private ContentControl _contentControl;
+        private bool _disposedValue;
+
+        public WindowManagerService(ILogger<WindowManagerService> logger,
+                                    IServiceScopeFactory serviceScopeFactory)
         {
-            this.logger = logger;
-            appWindows = new Dictionary<UIContext, AppWindow>();
+            _logger = logger;
+            _serviceScopeFactory = serviceScopeFactory;
+            _logger.LogInformation("Constructor: {HashCode}", GetHashCode().ToString());
         }
 
-        public async Task<int> OpenInNewWindow<TView>(object parameter = null)
+        public async Task OpenWindow(Type pageType, object parameter = null, string windowTitle = "")
         {
-            return await OpenInNewWindow(typeof(TView), parameter);
+            var scope = _serviceScopeFactory.CreateScope();
+            var wms = (WindowManagerService)scope.ServiceProvider.GetRequiredService<IWindowManagerService>();
+            await wms.OpenWindow(scope, pageType, parameter, windowTitle);
         }
 
-        public async Task<int> OpenInNewWindow(Type viewType, object parameter = null)
+        private async Task OpenWindow(IServiceScope scope,
+                                     Type viewType,
+                                     object parameter = null,
+                                     string windowTitle = "")
         {
-            AppWindow appWindow = await AppWindow.TryCreateAsync();
-            Frame appWindowFrame = new Frame();
-            appWindowFrame.Navigate(viewType, parameter);
-            ElementCompositionPreview.SetAppWindowContent(appWindow, appWindowFrame);
-            appWindows.Add(appWindowFrame.UIContext, appWindow);
-            appWindow.Closed += delegate
+            _scope = scope;
+
+            _appWindow = await AppWindow.TryCreateAsync();
+            _appWindow.Title = windowTitle;
+
+            _contentControl = new ContentControl
             {
-                appWindows.Remove(appWindowFrame.UIContext);
-                appWindowFrame.Content = null;
-                appWindow = null;
+                VerticalContentAlignment = VerticalAlignment.Stretch,
+                HorizontalContentAlignment = HorizontalAlignment.Stretch
             };
-            await appWindow.TryShowAsync();
-            return 0;
+
+            var navigationService = (NavigationService)_scope.ServiceProvider.GetService<INavigationService>();
+            navigationService.Initialize(_contentControl);
+
+            ElementCompositionPreview.SetAppWindowContent(_appWindow, _contentControl);
+
+            _appWindows.Add(_contentControl.UIContext, _appWindow);
+
+            navigationService.Navigate(viewType, parameter);
+
+            _appWindow.Closed += AppWindow_Closed;
+
+           await _appWindow.TryShowAsync();
         }
 
-        public async Task CloseViewAsync()
+        private void AppWindow_Closed(AppWindow sender, AppWindowClosedEventArgs args)
         {
-            //int currentId = ApplicationView.GetForCurrentView().Id;
-            //await ApplicationViewSwitcher.SwitchAsync(MainViewId, currentId, ApplicationViewSwitchingOptions.ConsolidateViews);
-            await Task.CompletedTask;
+            _appWindow.Closed -= AppWindow_Closed;
+            _appWindows.Remove(_contentControl.UIContext);
+            //navigationService = null;
+
+            _contentControl.Content = null;
+            _contentControl = null;
+            _appWindow = null;
+
+            _scope.Dispose();
+            _scope = null;
+        }
+
+        public async Task CloseWindowAsync()
+        {
+            if (_appWindow != null)
+            {
+                await _appWindow.CloseAsync();
+            }
+            else
+            {
+                await ApplicationView.GetForCurrentView().TryConsolidateAsync().AsTask();
+            }
+        }
+
+        public async Task CloseAllWindowsAsync()
+        {
+            foreach (var pair in _appWindows.ToList())
+            {
+                await pair.Value.CloseAsync();
+                //await Task.CompletedTask;
+            }
+            System.GC.Collect();
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!_disposedValue)
+            {
+                if (disposing)
+                {
+                    // TODO: eliminare lo stato gestito (oggetti gestiti)
+                }
+
+                // TODO: liberare risorse non gestite (oggetti non gestiti) ed eseguire l'override del finalizzatore
+                // TODO: impostare campi di grandi dimensioni su Null
+                _disposedValue = true;
+            }
+            _logger.LogInformation("Dispose: {HashCode} - {disposing}", GetHashCode().ToString(), disposing.ToString());
+        }
+
+        // // TODO: eseguire l'override del finalizzatore solo se 'Dispose(bool disposing)' contiene codice per liberare risorse non gestite
+        // ~WindowManagerService()
+        // {
+        //     // Non modificare questo codice. Inserire il codice di pulizia nel metodo 'Dispose(bool disposing)'
+        //     Dispose(disposing: false);
+        // }
+
+        public void Dispose()
+        {
+            // Non modificare questo codice. Inserire il codice di pulizia nel metodo 'Dispose(bool disposing)'
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
         }
     }
 }

@@ -40,29 +40,23 @@ namespace Inventory.Domain.OrderAggregate
         #region Equals
 
         public override bool Equals(object obj)
-        {
-            return Equals(obj as Shipper);
-        }
+            => Equals(obj as Shipper);
 
         public bool Equals(Shipper other)
         {
-            return !(other is null) &&
-                   Id == other.Id;
+            if (other is null)
+                return false;
+            if (Id != 0 && other.Id != 0)
+                return Id == other.Id;
+            return base.Equals(other);
         }
 
         public override int GetHashCode()
         {
-            return HashCode.Combine(Id);
-        }
-
-        public static bool operator ==(Shipper left, Shipper right)
-        {
-            return EqualityComparer<Shipper>.Default.Equals(left, right);
-        }
-
-        public static bool operator !=(Shipper left, Shipper right)
-        {
-            return !(left == right);
+            if (Id == 0)
+                return base.GetHashCode();
+            else
+                return HashCode.Combine(Id);
         }
 
         #endregion

@@ -28,7 +28,13 @@ namespace Inventory.Infrastructure.Common
     public abstract class ObservableObject<T> : Entity where T : ObservableObject<T>
     {
         [NotMapped]
-        public bool IsNew => Id <= 0;
+        public bool IsNew
+        {
+            get
+            {
+                return Id <= 0;
+            }
+        }
 
         [NotMapped]
         public bool IsEmpty

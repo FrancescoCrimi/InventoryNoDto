@@ -91,7 +91,7 @@ namespace Inventory.Uwp.ViewModels.OrderItems
         {
             try
             {
-                await OrderItemDetails.LoadAsync(new OrderItemDetailsArgs { OrderID = selected.OrderId, OrderLine = selected.OrderLine });
+                await OrderItemDetails.LoadAsync(new OrderItemDetailsArgs { OrderId = selected.OrderId, OrderLine = selected.OrderLine });
             }
             catch (Exception ex)
             {

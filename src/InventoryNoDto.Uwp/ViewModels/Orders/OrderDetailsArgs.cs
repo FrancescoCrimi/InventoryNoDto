@@ -18,7 +18,9 @@ namespace Inventory.Uwp.ViewModels.Orders
         public static OrderDetailsArgs CreateDefault() => new OrderDetailsArgs { CustomerId = 0 };
 
         public long CustomerId { get; set; }
+
         public long OrderId { get; set; }
+
         public Order Order { get; set; }
 
         public bool IsNew => OrderId == 0;

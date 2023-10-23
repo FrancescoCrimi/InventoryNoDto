@@ -169,29 +169,23 @@ namespace Inventory.Domain.ProductAggregate
         #region Equals
 
         public override bool Equals(object obj)
-        {
-            return Equals(obj as Product);
-        }
+            => Equals(obj as Product);
 
         public bool Equals(Product other)
         {
-            return !(other is null) &&
-                   Id == other.Id;
+            if (other is null)
+                return false;
+            if (Id != 0 && other.Id != 0)
+                return Id == other.Id;
+            return base.Equals(other);
         }
 
         public override int GetHashCode()
         {
-            return HashCode.Combine(Id);
-        }
-
-        public static bool operator ==(Product left, Product right)
-        {
-            return EqualityComparer<Product>.Default.Equals(left, right);
-        }
-
-        public static bool operator !=(Product left, Product right)
-        {
-            return !(left == right);
+            if (Id == 0)
+                return base.GetHashCode();
+            else
+                return HashCode.Combine(Id);
         }
 
         #endregion

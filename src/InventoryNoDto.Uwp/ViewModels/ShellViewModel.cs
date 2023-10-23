@@ -13,45 +13,42 @@ using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using Inventory.Infrastructure.Common;
 using Inventory.Infrastructure.Logging;
-using Inventory.Uwp.Helpers;
+using Inventory.Uwp.Contracts.Services;
 using Inventory.Uwp.Services;
 using Inventory.Uwp.ViewModels.Common;
-using Inventory.Uwp.Views.Settings;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using Windows.UI.Core;
-using Windows.UI.Xaml.Controls;
-using Windows.UI.Xaml.Navigation;
-using WinUI = Microsoft.UI.Xaml.Controls;
 
 namespace Inventory.Uwp.ViewModels
 {
     public class ShellViewModel : ViewModelBase
     {
-        private readonly ILogger<ShellViewModel> logger;
-        private readonly NavigationService navigationService;
-        private readonly LogService logService;
-        private readonly CoreDispatcher dispatcher;
+        private readonly ILogger<ShellViewModel> _logger;
+        private readonly INavigationService _navigationService;
+        private readonly LogService _logService;
+        private readonly CoreDispatcher _dispatcher;
         private bool _isEnabled = true;
         private bool _isError = false;
         private string _message = "Ready";
         private int logCount = 10;
         private bool _isBackEnabled;
         private AsyncRelayCommand _loadedCommand;
-        private RelayCommand unloadedCommand;
-        private AsyncRelayCommand<WinUI.NavigationViewItemInvokedEventArgs> _itemInvokedCommand;
-        private RelayCommand backRequestedCommand;
+        private RelayCommand _unloadedCommand;
+        private AsyncRelayCommand<Type> _itemInvokedCommand;
+        private RelayCommand _backRequestedCommand;
 
         public ShellViewModel(ILogger<ShellViewModel> logger,
-                              NavigationService navigationService,
+                              INavigationService navigationService,
                               LogService logService)
         {
-            this.logger = logger;
-            this.navigationService = navigationService;
-            this.logService = logService;
-            dispatcher = Windows.ApplicationModel.Core.CoreApplication.GetCurrentView().Dispatcher;
+            _logger = logger;
+            _navigationService = navigationService;
+            _logService = logService;
+            _dispatcher = Windows.ApplicationModel.Core.CoreApplication.GetCurrentView().Dispatcher;
+            _navigationService.Navigated += NavigationService_Navigated;
         }
 
         public bool IsEnabled
@@ -84,65 +81,49 @@ namespace Inventory.Uwp.ViewModels
             set => SetProperty(ref _isBackEnabled, value);
         }
 
-        public IAsyncRelayCommand LoadedCommand => _loadedCommand
-            ?? (_loadedCommand = new AsyncRelayCommand(async () =>
-            {
-                await UpdateAppLogBadge();
-                LogService.AddLogEvent += Logging_AddLogEvent;
-                Messenger.Register<StatusMessage>(this, OnStatusMessage);
-            }));
+        public IAsyncRelayCommand LoadedCommand
+            => _loadedCommand ?? (_loadedCommand = new AsyncRelayCommand(OnLoaded));
 
-        public ICommand UnloadedCommand => unloadedCommand
-            ?? (unloadedCommand = new RelayCommand(() =>
-            {
-                //MessageService.Unsubscribe(this);
-                LogService.AddLogEvent -= Logging_AddLogEvent;
-                Messenger.UnregisterAll(this);
-            }));
+        public ICommand UnloadedCommand
+            => _unloadedCommand ?? (_unloadedCommand = new RelayCommand(OnUnloaded));
 
-        public IAsyncRelayCommand ItemInvokedCommand => _itemInvokedCommand
-            ?? (_itemInvokedCommand = new AsyncRelayCommand<WinUI.NavigationViewItemInvokedEventArgs>(async (args) =>
+        public IAsyncRelayCommand ItemInvokedCommand
+            => _itemInvokedCommand ?? (_itemInvokedCommand = new AsyncRelayCommand<Type>(OnItemInvoked));
+
+        public ICommand BackRequestedCommand
+            => _backRequestedCommand ?? (_backRequestedCommand = new RelayCommand(()
+                => _navigationService.GoBack()));
+
+
+        private async Task OnLoaded()
+        {
+            await UpdateAppLogBadge();
+            LogService.AddLogEvent += Logging_AddLogEvent;
+            Messenger.Register<StatusMessage>(this, OnStatusMessage);
+        }
+
+        private void OnUnloaded()
+        {
+            //MessageService.Unsubscribe(this);
+            LogService.AddLogEvent -= Logging_AddLogEvent;
+            Messenger.UnregisterAll(this);
+        }
+
+        private async Task OnItemInvoked(Type pageType)
+        {
+            if (pageType != null)
             {
-                if (args.IsSettingsInvoked)
-                {
-                    navigationService.Navigate(typeof(SettingsPage), null, args.RecommendedNavigationTransitionInfo);
-                }
-                else
-                {
-                    var selectedItem = args.InvokedItemContainer as WinUI.NavigationViewItem;
-                    var pageType = selectedItem?.GetValue(NavHelper.NavigateToProperty) as Type;
-                    if (pageType != null)
-                    {
-                        navigationService.Navigate(pageType, null, args.RecommendedNavigationTransitionInfo);
-                    }
+                _navigationService.Navigate(pageType, null);
             }
-                await UpdateAppLogBadge();
-            }));
-
-        public ICommand BackRequestedCommand => backRequestedCommand
-            ?? (backRequestedCommand = new RelayCommand(() => navigationService.GoBack()));
-
-
-        public void Initialize(Frame frame)
-        {
-            navigationService.Frame = frame;
-            navigationService.NavigationFailed += Frame_NavigationFailed;
-            navigationService.Navigated += Frame_Navigated;
-            //navigationService.OnCurrentPageCanGoBackChanged += OnCurrentPageCanGoBackChanged;
+            await UpdateAppLogBadge();
         }
 
-        private void Frame_NavigationFailed(object sender, NavigationFailedEventArgs e)
+        private void NavigationService_Navigated(object sender, EventArgs e)
         {
-            throw e.Exception;
+            IsBackEnabled = _navigationService.CanGoBack;
         }
 
-        //private void OnCurrentPageCanGoBackChanged(object sender, bool currentPageCanGoBack)
-        //    => IsBackEnabled = navigationService.CanGoBack || currentPageCanGoBack;
-
-        private void Frame_Navigated(object sender, NavigationEventArgs e)
-        {
-            IsBackEnabled = navigationService.CanGoBack;
-        }
+   
 
         private void SetStatus(string message)
         {
@@ -192,9 +173,9 @@ namespace Inventory.Uwp.ViewModels
             ////LogNewCount = await logService.GetLogsCountAsync(new DataRequest<Log> { Where = r => !r.IsRead });
             //////AppLogsItem.Badge = count > 0 ? count.ToString() : null;
 
-            await dispatcher.RunAsync(CoreDispatcherPriority.Normal, async () =>
+            await _dispatcher.RunAsync(CoreDispatcherPriority.Normal, async () =>
             {
-                var result = await logService.GetLogsCountAsync(new DataRequest<Log> { Where = r => !r.IsRead });
+                var result = await _logService.GetLogsCountAsync(new DataRequest<Log> { Where = r => !r.IsRead });
                 LogCount = result;
             });
         }

@@ -33,20 +33,24 @@ namespace Inventory.Domain.CustomerAggregate
 
         #region Equals
 
-        public override bool Equals(object obj) => Equals(obj as Country);
+        public override bool Equals(object obj)
+            => Equals(obj as Country);
 
-        public bool Equals(Country other) => !(other is null) && Id == other.Id;
-
-        public override int GetHashCode() => HashCode.Combine(Id);
-
-        public static bool operator ==(Country left, Country right)
+        public bool Equals(Country other)
         {
-            return EqualityComparer<Country>.Default.Equals(left, right);
+            if (other is null)
+                return false;
+            if (Id != 0 && other.Id != 0)
+                return Id == other.Id;
+            return base.Equals(other);
         }
 
-        public static bool operator !=(Country left, Country right)
+        public override int GetHashCode()
         {
-            return !(left == right);
+            if (Id == 0)
+                return base.GetHashCode();
+            else
+                return HashCode.Combine(Id);
         }
 
         #endregion

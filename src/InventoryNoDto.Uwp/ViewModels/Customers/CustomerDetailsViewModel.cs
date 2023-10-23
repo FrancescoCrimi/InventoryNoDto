@@ -19,6 +19,7 @@ using Inventory.Application;
 using Inventory.Domain.CustomerAggregate;
 using Inventory.Infrastructure.Logging;
 using Inventory.Uwp.Common;
+using Inventory.Uwp.Contracts.Services;
 using Inventory.Uwp.Services;
 using Inventory.Uwp.ViewModels.Common;
 using Inventory.Uwp.ViewModels.Message;
@@ -31,10 +32,12 @@ namespace Inventory.Uwp.ViewModels.Customers
         private readonly ILogger _logger;
         private readonly FilePickerService _filePickerService;
         private readonly CustomerService _customerService;
+        private object _newPictureSource = null;
+        private RelayCommand _editPictureCommand;
 
         public CustomerDetailsViewModel(ILogger<CustomerDetailsViewModel> logger,
-                                        NavigationService navigationService,
-                                        WindowManagerService windowService,
+                                        INavigationService navigationService,
+                                        IWindowManagerService windowService,
                                         FilePickerService filePickerService,
                                         CustomerService customerService)
             : base(navigationService, windowService)
@@ -50,17 +53,28 @@ namespace Inventory.Uwp.ViewModels.Customers
 
         public string TitleEdit => Item == null ? "Customer" : $"{Item.FullName}";
 
-        public override bool ItemIsNew => Item?.IsNew ?? true;
+        public override bool ItemIsNew
+        {
+            get
+            {
+                // TODO: controllare il funzionamento di CancelEdit
+                //return Item?.IsNew ?? true;
+                return Item?.IsNew ?? false;
+            }
+        }
 
-        private object _newPictureSource = null;
         public object NewPictureSource
         {
             get => _newPictureSource;
             set => SetProperty(ref _newPictureSource, value);
         }
 
-        public ICommand EditPictureCommand => new RelayCommand(OnEditPicture);
-        private async void OnEditPicture()
+        public CustomerDetailsArgs ViewModelArgs
+        {
+            get; private set;
+        }
+
+        public ICommand EditPictureCommand => _editPictureCommand ?? (_editPictureCommand = new RelayCommand(async () =>
         {
             NewPictureSource = null;
             var result = await _filePickerService.OpenImagePickerAsync();
@@ -76,8 +90,7 @@ namespace Inventory.Uwp.ViewModels.Customers
             {
                 NewPictureSource = null;
             }
-        }
-
+        }));
 
         public IEnumerable<Country> Countries => _customerService.Countries;
 
@@ -85,11 +98,6 @@ namespace Inventory.Uwp.ViewModels.Customers
 
 
         #region method
-
-        public CustomerDetailsArgs ViewModelArgs
-        {
-            get; private set;
-        }
 
         public async Task LoadAsync(CustomerDetailsArgs args)
         {
@@ -114,6 +122,7 @@ namespace Inventory.Uwp.ViewModels.Customers
                 }
             }
         }
+
         public void Unload()
         {
             ViewModelArgs.CustomerId = Item?.Id ?? 0;
@@ -205,7 +214,6 @@ namespace Inventory.Uwp.ViewModels.Customers
             yield return new RequiredConstraint<Customer>("Postal Code", m => m.PostalCode);
             yield return new RequiredConstraint<Customer>("Country", m => m.Country);
         }
-
 
         private async void OnMessage(object recipient, ViewModelsMessage<Customer> message)
         {

@@ -16,7 +16,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace InventoryNoDto.Uwp.ViewModels.Orders
+namespace Inventory.Uwp.ViewModels.Orders
 {
     public class OrderArgs
     {

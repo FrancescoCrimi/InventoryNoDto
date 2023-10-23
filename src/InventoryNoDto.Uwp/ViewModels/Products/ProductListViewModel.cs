@@ -8,24 +8,24 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH
 // THE CODE OR THE USE OR OTHER DEALINGS IN THE CODE.
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using System.Windows.Input;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using Inventory.Application;
 using Inventory.Domain.ProductAggregate;
 using Inventory.Infrastructure.Common;
 using Inventory.Infrastructure.Logging;
+using Inventory.Uwp.Contracts.Services;
 using Inventory.Uwp.Library.Common;
-using Inventory.Uwp.Services;
 using Inventory.Uwp.Services.VirtualCollections;
 using Inventory.Uwp.ViewModels.Common;
 using Inventory.Uwp.ViewModels.Message;
 using Inventory.Uwp.Views.Products;
 using Microsoft.Extensions.Logging;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using System.Windows.Input;
 
 namespace Inventory.Uwp.ViewModels.Products
 {
@@ -33,14 +33,14 @@ namespace Inventory.Uwp.ViewModels.Products
     {
         private readonly ILogger _logger;
         private readonly ProductService _productService;
-        private readonly NavigationService _navigationService;
-        private readonly WindowManagerService _windowService;
+        private readonly INavigationService _navigationService;
+        private readonly IWindowManagerService _windowService;
         private readonly ProductCollection _collection;
 
         public ProductListViewModel(ILogger<ProductListViewModel> logger,
                                     ProductService productService,
-                                    NavigationService navigationService,
-                                    WindowManagerService windowService,
+                                    INavigationService navigationService,
+                                    IWindowManagerService windowService,
                                     ProductCollection collection)
             : base()
         {
@@ -61,7 +61,7 @@ namespace Inventory.Uwp.ViewModels.Products
 
         private async void ItemInvoked(Product model)
         {
-            await _windowService.OpenInNewWindow<ProductPage>(new ProductDetailsArgs { ProductId = model.Id });
+            await _windowService.OpenWindow(typeof(ProductView), new ProductDetailsArgs { ProductId = model.Id });
         }
 
         public async Task LoadAsync(ProductListArgs args)
@@ -132,11 +132,11 @@ namespace Inventory.Uwp.ViewModels.Products
 
             if (IsMainView)
             {
-                await _windowService.OpenInNewWindow<ProductPage>(new ProductDetailsArgs());
+                await _windowService.OpenWindow(typeof(ProductView), new ProductDetailsArgs());
             }
             else
             {
-                _navigationService.Navigate<ProductPage>(new ProductDetailsArgs());
+                _navigationService.Navigate(typeof(ProductView), new ProductDetailsArgs());
             }
 
             StatusReady();

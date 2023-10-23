@@ -63,12 +63,12 @@ namespace Inventory.Application
             await _orderRepository.UpdateOrderAsync(model);
         }
 
-        public async Task DeleteOrdersAsync(Order model)
+        public async Task DeleteOrderAsync(Order model)
         {
             await _orderRepository.DeleteOrdersAsync(model);
         }
 
-        public async Task DeleteOrderRangeAsync(int index, int length, DataRequest<Order> request)
+        public async Task DeleteOrdersRangeAsync(int index, int length, DataRequest<Order> request)
         {
             var items = await _orderRepository.GetOrderKeysAsync(index, length, request);
             await _orderRepository.DeleteOrdersAsync(items.ToArray());

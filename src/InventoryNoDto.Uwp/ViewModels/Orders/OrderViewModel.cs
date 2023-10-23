@@ -10,12 +10,9 @@
 // THE CODE OR THE USE OR OTHER DEALINGS IN THE CODE.
 
 using CommunityToolkit.Mvvm.Messaging;
-using Inventory.Application;
-using Inventory.Domain.OrderAggregate;
 using Inventory.Uwp.ViewModels.Common;
 using Inventory.Uwp.ViewModels.Message;
 using Inventory.Uwp.ViewModels.OrderItems;
-using InventoryNoDto.Uwp.ViewModels.Orders;
 using Microsoft.Extensions.Logging;
 using System.Threading.Tasks;
 
@@ -24,16 +21,13 @@ namespace Inventory.Uwp.ViewModels.Orders
     public class OrderViewModel : ViewModelBase
     {
         private readonly ILogger _logger;
-        private readonly OrderService _orderService;
 
         public OrderViewModel(ILogger<OrderViewModel> logger,
-                              OrderService orderService,
                               OrderDetailsViewModel orderDetailsViewModel,
                               OrderItemListViewModel orderItemListViewModel)
             : base()
         {
             _logger = logger;
-            _orderService = orderService;
             OrderDetails = orderDetailsViewModel;
             OrderItemList = orderItemListViewModel;
         }
@@ -44,49 +38,53 @@ namespace Inventory.Uwp.ViewModels.Orders
 
         public async Task LoadAsync(OrderArgs args)
         {
-
             long orderId = args?.OrderId ?? 0;
             if (orderId > 0)
             {
-                var order = await _orderService.GetOrderAsync(orderId);
-                await OrderDetails.LoadAsync(new OrderDetailsArgs { OrderId = orderId, Order = order });
-                await OrderItemList.LoadAsync(new OrderItemListArgs { OrderId = orderId, Order = order });
+                await OrderDetails.LoadAsync(new OrderDetailsArgs { OrderId = args.OrderId, CustomerId = args.CustomerId, Order = args.Order });
+                //await OrderItemList.LoadAsync(new OrderItemListArgs { OrderId = args.OrderId, Order = args.Order });
             }
             else
             {
-                await OrderDetails.LoadAsync(new OrderDetailsArgs { OrderId = 0});
-                await OrderItemList.LoadAsync(new OrderItemListArgs { OrderId = 0}, silent: true);
+                await OrderDetails.LoadAsync(new OrderDetailsArgs { OrderId = args.OrderId, CustomerId = args.CustomerId, Order = args.Order });
+                //await OrderItemList.LoadAsync(new OrderItemListArgs { OrderId = args.OrderId, Order = args.Order }, silent: true);
             }
-
         }
 
         public void Unload()
         {
-            //OrderDetails.CancelEdit();
+            OrderDetails.CancelEdit();
             OrderDetails.Unload();
             OrderItemList.Unload();
         }
 
         public void Subscribe()
         {
-            Messenger.Register<ViewModelsMessage<Order>>(this, OnMessage);
+            //Messenger.Register<ViewModelsMessage<Domain.OrderAggregate.Order>>(this, OnMessage);
             OrderDetails.Subscribe();
             OrderItemList.Subscribe();
+            OrderDetails.CurrentOrderEvent += OnOrderDetailsCurrentOrderEvent;
         }
 
         public void Unsubscribe()
         {
-            Messenger.UnregisterAll(this);
+            //Messenger.UnregisterAll(this);
             OrderDetails.Unsubscribe();
             OrderItemList.Unsubscribe();
+            OrderDetails.CurrentOrderEvent -= OnOrderDetailsCurrentOrderEvent;
         }
 
-        private async void OnMessage(object recipient, ViewModelsMessage<Order> message)
+        private async void OnOrderDetailsCurrentOrderEvent(Domain.OrderAggregate.Order order)
         {
-            if (message.Value == "ItemChanged" && message.Id != 0)
-            {
-                await OrderItemList.LoadAsync(new OrderItemListArgs { OrderId = message.Id });
-            }
+            await OrderItemList.LoadAsync(new OrderItemListArgs { OrderId = order.Id, Order = order });
         }
+
+        //private async void OnMessage(object recipient, ViewModelsMessage<Domain.OrderAggregate.Order> message)
+        //{
+        //    if (message.Value == "ItemChanged" && message.Id != 0)
+        //    {
+        //        await OrderItemList.LoadAsync(new OrderItemListArgs { OrderId = message.Id });
+        //    }
+        //}
     }
 }

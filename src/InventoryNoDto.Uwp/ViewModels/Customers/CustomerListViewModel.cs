@@ -20,6 +20,7 @@ using Inventory.Application;
 using Inventory.Domain.CustomerAggregate;
 using Inventory.Infrastructure.Common;
 using Inventory.Infrastructure.Logging;
+using Inventory.Uwp.Contracts.Services;
 using Inventory.Uwp.Library.Common;
 using Inventory.Uwp.Services;
 using Inventory.Uwp.Services.VirtualCollections;
@@ -34,14 +35,14 @@ namespace Inventory.Uwp.ViewModels.Customers
     {
         private readonly ILogger _logger;
         private readonly CustomerService _customerService;
-        private readonly NavigationService _navigationService;
-        private readonly WindowManagerService _windowService;
+        private readonly INavigationService _navigationService;
+        private readonly IWindowManagerService _windowService;
         private readonly CustomerCollection _collection;
 
         public CustomerListViewModel(ILogger<CustomerListViewModel> logger,
                                      CustomerService customerService,
-                                     NavigationService navigationService,
-                                     WindowManagerService windowService,
+                                     INavigationService navigationService,
+                                     IWindowManagerService windowService,
                                      CustomerCollection collection)
             : base()
         {
@@ -63,7 +64,7 @@ namespace Inventory.Uwp.ViewModels.Customers
         {
             if (SelectedItem != null)
             {
-                await _windowService.OpenInNewWindow<CustomerPage>(new CustomerDetailsArgs { CustomerId = SelectedItem.Id });
+                await _windowService.OpenWindow(typeof(CustomerView), new CustomerDetailsArgs { CustomerId = SelectedItem.Id });
             }
         }
 
@@ -133,11 +134,11 @@ namespace Inventory.Uwp.ViewModels.Customers
         {
             if (IsMainView)
             {
-                await _windowService.OpenInNewWindow<CustomerPage>(new CustomerDetailsArgs());
+                await _windowService.OpenWindow(typeof(CustomerView), new CustomerDetailsArgs());
             }
             else
             {
-                _navigationService.Navigate<CustomerPage>(new CustomerDetailsArgs());
+                _navigationService.Navigate(typeof(CustomerView), new CustomerDetailsArgs());
             }
 
             StatusReady();

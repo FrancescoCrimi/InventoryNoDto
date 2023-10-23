@@ -20,6 +20,7 @@ using Inventory.Domain.OrderAggregate;
 using Inventory.Domain.ProductAggregate;
 using Inventory.Infrastructure.Common;
 using Inventory.Infrastructure.Logging;
+using Inventory.Uwp.Contracts.Services;
 using Inventory.Uwp.Services;
 using Inventory.Uwp.ViewModels.Common;
 using Inventory.Uwp.ViewModels.Customers;
@@ -37,7 +38,7 @@ namespace Inventory.Uwp.ViewModels.Dashboard
     {
         private readonly ILogger _logger;
         private readonly DashboardService _dashboardService;
-        private readonly NavigationService _navigationService;
+        private readonly INavigationService _navigationService;
         private AsyncRelayCommand _loadedCommand;
         private RelayCommand _unLoadedCommand;
         private RelayCommand<ItemClickEventArgs> _itemClickCommand;
@@ -47,7 +48,7 @@ namespace Inventory.Uwp.ViewModels.Dashboard
 
         public DashboardViewModel(ILogger<DashboardViewModel> logger,
                                   DashboardService dashboardService,
-                                  NavigationService navigationService
+                                  INavigationService navigationService
             )
             : base()
         {
@@ -154,13 +155,13 @@ namespace Inventory.Uwp.ViewModels.Dashboard
                 switch (control.Tag as string)
                 {
                     case "Customers":
-                        _navigationService.Navigate<CustomersPage>(new CustomerListArgs { OrderByDesc = r => r.CreatedOn });
+                        _navigationService.Navigate(typeof(CustomersView),new CustomerListArgs { OrderByDesc = r => r.CreatedOn });
                         break;
                     case "Orders":
-                        _navigationService.Navigate<OrdersPage>(new OrderListArgs { OrderByDesc = r => r.OrderDate });
+                        _navigationService.Navigate(typeof(OrdersView), new OrderListArgs { OrderByDesc = r => r.OrderDate });
                         break;
                     case "Products":
-                        _navigationService.Navigate<ProductsPage>(new ProductListArgs { OrderByDesc = r => r.ListPrice });
+                        _navigationService.Navigate(typeof(ProductsView), new ProductListArgs { OrderByDesc = r => r.ListPrice });
                         break;
                     default:
                         break;

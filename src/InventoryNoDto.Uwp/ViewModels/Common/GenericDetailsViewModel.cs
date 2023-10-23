@@ -13,6 +13,7 @@ using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using Inventory.Infrastructure.Common;
 using Inventory.Uwp.Common;
+using Inventory.Uwp.Contracts.Services;
 using Inventory.Uwp.Services;
 using Inventory.Uwp.ViewModels.Message;
 using System.Collections.Generic;
@@ -25,8 +26,8 @@ namespace Inventory.Uwp.ViewModels.Common
     public abstract class GenericDetailsViewModel<TModel>
         : ViewModelBase where TModel : Inventory.Infrastructure.Common.ObservableObject<TModel>, new()
     {
-        private readonly NavigationService _navigationService;
-        private readonly WindowManagerService _windowService;
+        private readonly INavigationService _navigationService;
+        private readonly IWindowManagerService _windowService;
         private bool _isEditMode = false;
         private bool _isEnabled = true;
         private TModel _item = null;
@@ -37,8 +38,8 @@ namespace Inventory.Uwp.ViewModels.Common
         private AsyncRelayCommand _saveCommand;
         private AsyncRelayCommand _deleteCommand;
 
-        public GenericDetailsViewModel(NavigationService navigationService,
-                                       WindowManagerService windowService
+        public GenericDetailsViewModel(INavigationService navigationService,
+                                       IWindowManagerService windowService
             //, LookupTablesService lookupTablesService
             )
             : base()
@@ -179,7 +180,10 @@ namespace Inventory.Uwp.ViewModels.Common
             {
                 //Item.Merge(EditableItem);
                 //Item.NotifyChanges();
+
                 Item = await GetItemAsync(EditableItem.Id);
+                //Item = EditableItem;
+
                 OnPropertyChanged(nameof(Title));
                 EditableItem = Item;
 
@@ -225,7 +229,7 @@ namespace Inventory.Uwp.ViewModels.Common
                 {
                     Task.Run(async () =>
                     {
-                        await _windowService.CloseViewAsync();
+                        await _windowService.CloseWindowAsync();
                     });
                 }
                 return;
@@ -234,7 +238,6 @@ namespace Inventory.Uwp.ViewModels.Common
             //// We were editing an existing item: just cancel edition
             if (IsEditMode)
             {
-                //EditableItem = Item;
                 var item = GetItemAsync(Item.Id).Result;
                 EditableItem = item;
             }

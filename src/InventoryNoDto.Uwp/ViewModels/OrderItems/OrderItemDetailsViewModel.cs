@@ -8,37 +8,42 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH
 // THE CODE OR THE USE OR OTHER DEALINGS IN THE CODE.
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using System.Windows.Input;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using Inventory.Application;
 using Inventory.Domain.OrderAggregate;
 using Inventory.Domain.ProductAggregate;
-using Inventory.Infrastructure.Logging;
 using Inventory.Uwp.Common;
-using Inventory.Uwp.Services;
+using Inventory.Uwp.Contracts.Services;
 using Inventory.Uwp.ViewModels.Common;
 using Inventory.Uwp.ViewModels.Message;
 using Microsoft.Extensions.Logging;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using System.Windows.Input;
 
 namespace Inventory.Uwp.ViewModels.OrderItems
 {
     public class OrderItemDetailsViewModel : /*GenericDetailsViewModel<OrderItem>*/ ViewModelBase
     {
         private readonly ILogger _logger;
+        private readonly INavigationService _navigationService;
+        private readonly IWindowManagerService _windowService;
         private readonly OrderService _orderService;
+        private RelayCommand<Product> _productSelectedCommand;
+        private bool _isEditMode;
+        private OrderItem _item;
 
         public OrderItemDetailsViewModel(ILogger<OrderItemDetailsViewModel> logger,
-                                         NavigationService navigationService,
-                                         WindowManagerService windowService,
+                                         INavigationService navigationService,
+                                         IWindowManagerService windowService,
                                          OrderService orderService)
         //: base(navigationService, windowService)
         {
             _logger = logger;
+            _navigationService = navigationService;
+            _windowService = windowService;
             //_orderItemRepository = orderItemRepository;
             _orderService = orderService;
         }
@@ -53,27 +58,76 @@ namespace Inventory.Uwp.ViewModels.OrderItems
 
         public /*override*/ bool ItemIsNew => Item?.IsNew ?? true;
 
-        public OrderItemDetailsArgs ViewModelArgs
+        public OrderItemDetailsArgs ViewModelArgs { get; private set; }
+
+        public long OrderID { get; set; }
+
+        public OrderItem Item
         {
-            get; private set;
+            get => _item;
+            set
+            {
+                if (SetProperty(ref _item, value))
+                {
+                    //EditableItem = _item;
+                    //IsEnabled = (!_item?.IsEmpty) ?? false;
+                    //OnPropertyChanged(nameof(IsDataAvailable));
+                    //OnPropertyChanged(nameof(IsDataUnavailable));
+                    OnPropertyChanged(nameof(Title));
+                }
+            }
         }
 
-        public long OrderID
-        {
-            get; set;
-        }
-
-        public OrderItem Item { get; set; }
         public Order Order { get; set; }
 
-        public ICommand ProductSelectedCommand => new RelayCommand<Product>(ProductSelected);
-        private void ProductSelected(Product product)
+        public IEnumerable<TaxType> TaxTypes => _orderService.TaxTypes;
+
+        public bool IsEditMode
         {
-            Item = Order.CreateNewOrderItem(product);
+            get => _isEditMode;
+            set => SetProperty(ref _isEditMode, value);
         }
 
+        public bool CanGoBack => !IsMainView && _navigationService.CanGoBack;
 
-        public IEnumerable<TaxType> TaxTypes => _orderService.TaxTypes;
+        #endregion
+
+
+        #region command
+
+        public ICommand SaveCommand => new RelayCommand(() =>
+        {
+        });
+
+        public ICommand CancelCommand => new RelayCommand(() =>
+        {
+            StatusReady();
+            CancelEdit();
+            Messenger.Send(new ViewModelsMessage<OrderItem>("CancelEdit", Item.Id));
+        });
+
+        public ICommand DeleteCommand => new RelayCommand(() =>
+        {
+        });
+
+        public ICommand EditCommand => new RelayCommand(() =>
+        {
+            StatusReady();
+            BeginEdit();
+            //MessageService.Send(this, "BeginEdit", Item);
+            Messenger.Send(new ViewModelsMessage<OrderItem>("BeginEdit", Item.Id));
+        });
+
+        public ICommand BackCommand => new RelayCommand(() =>
+        {
+        });
+
+
+        public ICommand ProductSelectedCommand => _productSelectedCommand
+            ?? (_productSelectedCommand = new RelayCommand<Product>((product) =>
+            {
+                Item = Order.CreateNewOrderItem(product);
+            }));
 
         #endregion
 
@@ -82,17 +136,17 @@ namespace Inventory.Uwp.ViewModels.OrderItems
 
         public async Task LoadAsync(OrderItemDetailsArgs args)
         {
-            ViewModelArgs = args ?? OrderItemDetailsArgs.CreateDefault();
-            OrderID = ViewModelArgs.OrderID;
+            ViewModelArgs = args;
+            OrderID = ViewModelArgs.OrderId;
             Item = args.OrderItem;
             Order = args.Order;
             await Task.CompletedTask;
 
-            //if (ViewModelArgs.IsNew)
-            //{
-            //    Item = new OrderItem { OrderId = OrderID };
-            //    IsEditMode = true;
-            //}
+            if (ViewModelArgs.IsNew)
+            {
+                //Item = new OrderItem { OrderId = OrderID };
+                IsEditMode = true;
+            }
             //else
             //{
             //    try
@@ -109,7 +163,7 @@ namespace Inventory.Uwp.ViewModels.OrderItems
 
         public void Unload()
         {
-            ViewModelArgs.OrderID = Item?.OrderId ?? 0;
+            ViewModelArgs.OrderId = Item?.OrderId ?? 0;
         }
 
         public void Subscribe()
@@ -126,19 +180,55 @@ namespace Inventory.Uwp.ViewModels.OrderItems
         {
             return new OrderItemDetailsArgs
             {
-                OrderID = Item?.OrderId ?? 0,
+                OrderId = Item?.OrderId ?? 0,
                 OrderLine = Item?.OrderLine ?? 0
             };
+        }
+
+        public virtual void BeginEdit()
+        {
+            if (!IsEditMode)
+            {
+                IsEditMode = true;
+                //// Create a copy for edit
+                //var editableItem = new TModel();
+                //editableItem.Merge(Item);
+                //EditableItem = editableItem;
+            }
+        }
+
+        public virtual void CancelEdit()
+        {
+            if (ItemIsNew)
+            {
+                // We were creating a new item: cancel means exit
+                if (_navigationService.CanGoBack)
+                {
+                    _navigationService.GoBack();
+                }
+                else
+                {
+                    Task.Run(async () =>
+                    {
+                        await _windowService.CloseWindowAsync();
+                    });
+                }
+                return;
+            }
+
+            //// We were editing an existing item: just cancel edition
+            //if (IsEditMode)
+            //{
+            //    var item = GetItemAsync(Item.Id).Result;
+            //    EditableItem = item;
+            //}
+            IsEditMode = false;
         }
 
         #endregion
 
 
         #region protected and private method
-
- 
-
-
 
         protected /*override*/ IEnumerable<IValidationConstraint<OrderItem>> GetValidationConstraints(OrderItem model)
         {
@@ -149,7 +239,6 @@ namespace Inventory.Uwp.ViewModels.OrderItems
             yield return new PositiveConstraint<OrderItem>("Discount", m => m.Discount);
             yield return new NonGreaterThanConstraint<OrderItem>("Discount", m => m.Discount, (double)model.Subtotal, "'Subtotal'");
         }
-
 
         private async void OnMessage(object recipient, ViewModelsMessage<OrderItem> message)
         {

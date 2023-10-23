@@ -9,118 +9,241 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH
 // THE CODE OR THE USE OR OTHER DEALINGS IN THE CODE.
 
+using Inventory.Uwp.Contracts.Services;
+using Inventory.Uwp.Contracts.Views;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using System;
-using Windows.UI.Xaml;
+using System.Collections.Generic;
 using Windows.UI.Xaml.Controls;
-using Windows.UI.Xaml.Media.Animation;
-using Windows.UI.Xaml.Navigation;
 
 namespace Inventory.Uwp.Services
 {
-    public class NavigationService
+    public class NavigationService : INavigationService, IDisposable
     {
-        public event NavigatedEventHandler Navigated;
-        public event NavigationFailedEventHandler NavigationFailed;
+        public event EventHandler Navigated;
 
-        private Frame _frame;
-        private object _lastParamUsed;
+        private readonly ILogger _logger;
+        private readonly IServiceProvider _serviceProvider;
+        private readonly Stack<UserControl> _forwardStack;
+        private readonly Stack<UserControl> _backStack;
+        private ContentControl _contentControl;
+        private object _lastParameterUsed;
+        private bool _disposedValue;
 
-        public NavigationService()
+        public NavigationService(ILogger<NavigationService> logger,
+                                 IServiceProvider serviceProvider)
         {
+            _logger = logger;
+            _serviceProvider = serviceProvider;
+            _forwardStack = new Stack<UserControl>();
+            _backStack = new Stack<UserControl>();
+            _logger.LogInformation("Constructor: {HashCode}", GetHashCode().ToString());
         }
 
-        public Frame Frame
+        public void Initialize(ContentControl frame)
         {
-            get
+            if (frame is null)
             {
-                if (_frame == null)
-                {
-                    _frame = Window.Current.Content as Frame;
-                    RegisterFrameEvents();
-                }
-                return _frame;
+                throw new ArgumentNullException(nameof(frame));
             }
-            set
+            if (_contentControl == null)
             {
-                UnregisterFrameEvents();
-                _frame = value;
-                RegisterFrameEvents();
+                _contentControl = frame;
+            }
+            else
+            {
+                throw new Exception("NavigationService already initialized");
             }
         }
 
-        public bool CanGoBack => Frame.CanGoBack;
+        public bool CanGoBack => _backStack.Count != 0;
 
-        public bool CanGoForward => Frame.CanGoForward;
+        public bool CanGoForward => _forwardStack.Count != 0;
 
-        public bool GoBack()
+        public void GoBack()
         {
-            if (CanGoBack)
+            if (_backStack.Count != 0)
             {
-                Frame.GoBack();
-                return true;
+                _forwardStack.Push((UserControl)ContentControl.Content);
+                ContentControl.Content = _backStack.Peek();
+                _backStack.Pop();
+                Navigated?.Invoke(this, new EventArgs());
             }
-            return false;
         }
 
         public void GoForward()
-            => Frame.GoForward();
-
-        public bool Navigate(Type pageType, object parameter = null, NavigationTransitionInfo infoOverride = null)
         {
-            if (pageType == null || !pageType.IsSubclassOf(typeof(Page)))
+            if (_forwardStack.Count != 0)
+            {
+                _backStack.Push((UserControl)ContentControl.Content);
+                ContentControl.Content = _forwardStack.Peek();
+                _forwardStack.Pop();
+                Navigated?.Invoke(this, new EventArgs());
+            }
+        }
+
+        public bool UpdateView(Type pageType,
+                               object parameter = null)
+        {
+            //var pageType = _pageService.GetPageType(pageKey);
+            if (pageType == null || !pageType.IsSubclassOf(typeof(UserControl)))
             {
                 throw new ArgumentException($"Invalid pageType '{pageType}', please provide a valid pageType.", nameof(pageType));
             }
 
             // Don't open the same page multiple times
-            if (Frame.Content?.GetType() != pageType || parameter != null && !parameter.Equals(_lastParamUsed))
+            if (ContentControl.Content?.GetType() != pageType || (parameter != null && !parameter.Equals(_lastParameterUsed)))
             {
-                var navigationResult = Frame.Navigate(pageType, parameter, infoOverride);
-                if (navigationResult)
+                _lastParameterUsed = parameter;
+                var page = _serviceProvider.GetRequiredService(pageType);
+
+                // termina pagina corrente
+                if (ContentControl.Content != null)
                 {
-                    _lastParamUsed = parameter;
+                    if (ContentControl.Content is IView pagefrom)
+                    {
+                        pagefrom.OnNavigatedFrom();
+                    }
                 }
 
-                return navigationResult;
+                TerminateBackStack();
+                TerminateForwardStack();
+
+                // visualizza nuova pagina
+                ContentControl.Content = page;
+
+                // inizializza nuova pagina
+                if (page is IView navigationAware)
+                {
+                    navigationAware.OnNavigatedTo(parameter);
+                }
+
+                Navigated?.Invoke(this, new EventArgs());
+                return true;
             }
-            else
-            {
-                return false;
-            }
+            return false;
         }
 
-        public bool Navigate<T>(object parameter = null, NavigationTransitionInfo infoOverride = null)
-            where T : Page
-            => Navigate(typeof(T), parameter, infoOverride);
-
-        private void RegisterFrameEvents()
+        public bool Navigate(Type pageType,
+                             object parameter = null)
         {
-            if (_frame != null)
+            //var pageType = _pageService.GetPageType(pageKey);
+            if (pageType == null || !pageType.IsSubclassOf(typeof(UserControl)))
             {
-                _frame.Navigated += Frame_Navigated;
-                _frame.Navigating += Frame_Navigating;
-                _frame.NavigationFailed += Frame_NavigationFailed;
+                throw new ArgumentException($"Invalid pageType '{pageType}', please provide a valid pageType.", nameof(pageType));
+            }
+
+            // Don't open the same page multiple times
+            if (ContentControl.Content?.GetType() != pageType || parameter != null && !parameter.Equals(_lastParameterUsed))
+            {
+                _lastParameterUsed = parameter;
+                var page = _serviceProvider.GetRequiredService(pageType);
+
+                // copia pagina corrente nel backstack
+                if (ContentControl.Content != null)
+                {
+                    _backStack.Push((UserControl)ContentControl.Content);
+                }
+
+                TerminateForwardStack();
+
+                // visualizza nuova pagina
+                ContentControl.Content = page;
+
+                // inizializza nuova pagina
+                if (page is IView navigationAware)
+                {
+                    navigationAware.OnNavigatedTo(parameter);
+                }
+
+                Navigated?.Invoke(this, new EventArgs());
+                return true;
+            }
+            return false;
+        }
+
+
+        private ContentControl ContentControl
+        {
+            get
+            {
+                if (_contentControl == null)
+                {
+                    throw new Exception("NavigationService must be Initialize before use it");
+                }
+                return _contentControl;
             }
         }
 
-        private void UnregisterFrameEvents()
+        private void TerminateBackStack()
         {
-            if (_frame != null)
+            foreach (var item in _backStack)
             {
-                _frame.Navigated -= Frame_Navigated;
-                _frame.Navigating -= Frame_Navigating;
-                _frame.NavigationFailed -= Frame_NavigationFailed;
+                if (item is IView itemfrom)
+                {
+                    itemfrom.OnNavigatedFrom();
+                }
             }
+            _backStack.Clear();
         }
 
-        private void Frame_NavigationFailed(object sender, NavigationFailedEventArgs e)
-            => NavigationFailed?.Invoke(sender, e);
-
-        private void Frame_Navigated(object sender, NavigationEventArgs e)
-            => Navigated?.Invoke(sender, e);
-
-        private void Frame_Navigating(object sender, NavigatingCancelEventArgs e)
+        private void TerminateForwardStack()
         {
+            foreach (var item in _forwardStack)
+            {
+                if (item is IView itemfrom)
+                {
+                    itemfrom.OnNavigatedFrom();
+                }
+            }
+            _forwardStack.Clear();
         }
+
+
+        #region dispose
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!_disposedValue)
+            {
+                if (disposing)
+                {
+                    // TODO: eliminare lo stato gestito (oggetti gestiti)
+                    TerminateBackStack();
+                    TerminateForwardStack();
+                    if (_contentControl != null)
+                    {
+                        if (_contentControl.Content is IView navigationAware)
+                        {
+                            navigationAware.OnNavigatedFrom();
+                        }
+                        _contentControl.Content = null;
+                        _contentControl = null;
+                    }
+                }
+
+                // TODO: liberare risorse non gestite (oggetti non gestiti) ed eseguire l'override del finalizzatore
+                // TODO: impostare campi di grandi dimensioni su Null
+                _disposedValue = true;
+            }
+            _logger.LogInformation("Dispose: {HashCode} - {disposing}", GetHashCode().ToString(), disposing.ToString());
+        }
+
+        // // TODO: eseguire l'override del finalizzatore solo se 'Dispose(bool disposing)' contiene codice per liberare risorse non gestite
+        // ~NavigationService()
+        // {
+        //     // Non modificare questo codice. Inserire il codice di pulizia nel metodo 'Dispose(bool disposing)'
+        //     Dispose(disposing: false);
+        // }
+
+        public void Dispose()
+        {
+            // Non modificare questo codice. Inserire il codice di pulizia nel metodo 'Dispose(bool disposing)'
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
+        }
+
+        #endregion
     }
 }

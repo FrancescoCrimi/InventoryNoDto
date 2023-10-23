@@ -11,9 +11,11 @@
 
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
+using Inventory.Domain.OrderAggregate;
 using Inventory.Uwp.Common;
 using Inventory.Uwp.Library.Common;
 using Inventory.Uwp.ViewModels.Message;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Input;
@@ -42,6 +44,8 @@ namespace Inventory.Uwp.ViewModels.Common
             : base()
         {
         }
+
+        public event Action<long> SelectedItemEvent;
 
         #region property
 
@@ -85,6 +89,7 @@ namespace Inventory.Uwp.ViewModels.Common
                         {
                             //MessageService.Send(this, "ItemSelected", _selectedItem);
                             Messenger.Send(new ViewModelsMessage<TModel>("ItemSelected", _selectedItem.Id));
+                            SelectedItemEvent?.Invoke(_selectedItem.Id);
                         }
                     }
                 }
@@ -106,8 +111,8 @@ namespace Inventory.Uwp.ViewModels.Common
 
         #region icommand property
 
-        public ICommand NewCommand => _newCommand
-            ?? (_newCommand = new RelayCommand(OnNew));
+        public ICommand NewCommand
+            => _newCommand ?? (_newCommand = new RelayCommand(OnNew));
         protected abstract void OnNew();
 
         public ICommand RefreshCommand => _refreshCommand

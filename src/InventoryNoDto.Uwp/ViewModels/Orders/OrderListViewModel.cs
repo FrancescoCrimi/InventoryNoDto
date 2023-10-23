@@ -14,13 +14,12 @@ using Inventory.Application;
 using Inventory.Domain.OrderAggregate;
 using Inventory.Infrastructure.Common;
 using Inventory.Infrastructure.Logging;
+using Inventory.Uwp.Contracts.Services;
 using Inventory.Uwp.Library.Common;
-using Inventory.Uwp.Services;
 using Inventory.Uwp.Services.VirtualCollections;
 using Inventory.Uwp.ViewModels.Common;
 using Inventory.Uwp.ViewModels.Message;
 using Inventory.Uwp.Views.Orders;
-using InventoryNoDto.Uwp.ViewModels.Orders;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System;
@@ -31,18 +30,20 @@ using System.Windows.Input;
 
 namespace Inventory.Uwp.ViewModels.Orders
 {
-    public class OrderListViewModel : GenericListViewModel<Order>
+    public class OrderListViewModel
+        : GenericListViewModel<Order>
     {
         private readonly ILogger _logger;
         private readonly OrderService _orderService;
-        private readonly WindowManagerService _windowService;
-        private readonly NavigationService _navigationService;
+        private readonly IWindowManagerService _windowService;
+        private readonly INavigationService _navigationService;
         private readonly OrderCollection _collection;
+        private AsyncRelayCommand _openInNewViewCommand;
 
         public OrderListViewModel(ILogger<OrderListViewModel> logger,
                                   IServiceProvider serviceProvider,
-                                  WindowManagerService windowService,
-                                  NavigationService navigationService,
+                                  IWindowManagerService windowService,
+                                  INavigationService navigationService,
                                   OrderCollection collection)
             : base()
         {
@@ -129,24 +130,27 @@ namespace Inventory.Uwp.ViewModels.Orders
             return isOk;
         }
 
-        public ICommand OpenInNewViewCommand => new RelayCommand(OnOpenInNewView);
-        private async void OnOpenInNewView()
-        {
-            if (SelectedItem != null)
+        public ICommand OpenInNewViewCommand => _openInNewViewCommand
+            ?? (_openInNewViewCommand = new AsyncRelayCommand(() =>
             {
-                await _windowService.OpenInNewWindow<OrderPage>(new OrderArgs { OrderId = SelectedItem.Id });
-            }
-        }
+                if (SelectedItem != null)
+                {
+                    return _windowService.OpenWindow(typeof(OrderView), new OrderArgs { OrderId = SelectedItem.Id });
+                }
+                else
+                    return Task.CompletedTask;
+            }));
 
         protected async override void OnNew()
         {
             if (IsMainView)
             {
-                await _windowService.OpenInNewWindow<OrderPage>(new OrderArgs { CustomerId = ViewModelArgs.CustomerId });
+                //await _windowService.OpenInNewWindow<Views.Test.OrderPage>(new OrderArgs { CustomerId = ViewModelArgs.CustomerId });
+                await _windowService.OpenWindow(typeof(OrderView), new OrderArgs { CustomerId = ViewModelArgs.CustomerId });
             }
             else
             {
-                _navigationService.Navigate<OrderPage>(new OrderArgs { CustomerId = ViewModelArgs.CustomerId });
+                _navigationService.Navigate(typeof(OrderView), new OrderArgs { CustomerId = ViewModelArgs.CustomerId });
             }
 
             StatusReady();
@@ -206,7 +210,7 @@ namespace Inventory.Uwp.ViewModels.Orders
         {
             foreach (var model in models)
             {
-                await _orderService.DeleteOrdersAsync(model);
+                await _orderService.DeleteOrderAsync(model);
             }
         }
 
@@ -215,7 +219,7 @@ namespace Inventory.Uwp.ViewModels.Orders
             DataRequest<Order> request = BuildDataRequest();
             foreach (var range in ranges)
             {
-                await _orderService.DeleteOrderRangeAsync(range.Index, range.Length, request);
+                await _orderService.DeleteOrdersRangeAsync(range.Index, range.Length, request);
             }
         }
 

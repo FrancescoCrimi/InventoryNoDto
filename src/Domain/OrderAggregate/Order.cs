@@ -145,7 +145,11 @@ namespace Inventory.Domain.OrderAggregate
         public long StatusId
         {
             get => statusId;
-            set => SetProperty(ref statusId, value);
+            set
+            {
+                if (SetProperty(ref statusId, value))
+                    UpdateStatusDependencies();
+            }
         }
 
 
@@ -172,7 +176,11 @@ namespace Inventory.Domain.OrderAggregate
         public virtual OrderStatus Status
         {
             get => status;
-            set => SetProperty(ref status, value);
+            set
+            {
+                if (SetProperty(ref status, value))
+                    UpdateStatusDependencies();
+            }
         }
         public virtual ObservableCollection<OrderItem> OrderItems
         {
@@ -258,32 +266,57 @@ namespace Inventory.Domain.OrderAggregate
         #endregion
 
 
+        #region private method
+
+        private void UpdateStatusDependencies()
+        {
+            switch (StatusId)
+            {
+                case 0:
+                case 1:
+                    ShippedDate = null;
+                    DeliveredDate = null;
+                    break;
+                case 2:
+                    ShippedDate = ShippedDate ?? OrderDate;
+                    DeliveredDate = null;
+                    break;
+                case 3:
+                    ShippedDate = ShippedDate ?? OrderDate;
+                    DeliveredDate = DeliveredDate ?? ShippedDate ?? OrderDate;
+                    break;
+            }
+
+            //OnPropertyChanged(nameof(Status));
+            //OnPropertyChanged(nameof(StatusId));
+            OnPropertyChanged(nameof(CanEditPayment));
+            OnPropertyChanged(nameof(CanEditShipping));
+            OnPropertyChanged(nameof(CanEditDelivery));
+        }
+
+        #endregion
+
+
         #region equals
 
         public override bool Equals(object obj)
-        {
-            return Equals(obj as Order);
-        }
+            => Equals(obj as Order);
 
         public bool Equals(Order other)
         {
-            return !(other is null)
-                && Id == other.Id;
+            if (other is null)
+                return false;
+            if (Id != 0 && other.Id != 0)
+                return Id == other.Id;
+            return base.Equals(other);
         }
 
         public override int GetHashCode()
         {
-            return HashCode.Combine(Id);
-        }
-
-        public static bool operator ==(Order left, Order right)
-        {
-            return EqualityComparer<Order>.Default.Equals(left, right);
-        }
-
-        public static bool operator !=(Order left, Order right)
-        {
-            return !(left == right);
+            if (Id == 0)
+                return base.GetHashCode();
+            else
+                return HashCode.Combine(Id);
         }
 
         #endregion

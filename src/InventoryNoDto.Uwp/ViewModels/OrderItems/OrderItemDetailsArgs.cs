@@ -14,9 +14,7 @@ namespace Inventory.Uwp.ViewModels.OrderItems
 {
     public class OrderItemDetailsArgs
     {
-        public static OrderItemDetailsArgs CreateDefault() => new OrderItemDetailsArgs();
-
-        public long OrderID { get; set; }
+        public long OrderId { get; set; }
         public int OrderLine { get; set; }
         public OrderItem OrderItem { get; set; }
         public Order Order { get; set; }
