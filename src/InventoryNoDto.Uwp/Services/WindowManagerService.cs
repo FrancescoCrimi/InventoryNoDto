@@ -31,69 +31,31 @@ namespace Inventory.Uwp.Services
             = new Dictionary<UIContext, AppWindow>();
 
         private readonly ILogger _logger;
+        private readonly IServiceProvider _serviceProvider;
         private readonly IServiceScopeFactory _serviceScopeFactory;
+
         private IServiceScope _scope;
         private AppWindow _appWindow;
         private ContentControl _contentControl;
         private bool _disposedValue;
 
         public WindowManagerService(ILogger<WindowManagerService> logger,
+                                    IServiceProvider serviceProvider,
                                     IServiceScopeFactory serviceScopeFactory)
         {
             _logger = logger;
+            _serviceProvider = serviceProvider;
             _serviceScopeFactory = serviceScopeFactory;
             _logger.LogInformation("Constructor: {HashCode}", GetHashCode().ToString());
         }
 
-        public async Task OpenWindow(Type pageType, object parameter = null, string windowTitle = "")
+        public async Task OpenWindowAsync(Type pageType,
+                                     object parameter = null,
+                                     string windowTitle = "")
         {
             var scope = _serviceScopeFactory.CreateScope();
             var wms = (WindowManagerService)scope.ServiceProvider.GetRequiredService<IWindowManagerService>();
             await wms.OpenWindow(scope, pageType, parameter, windowTitle);
-        }
-
-        private async Task OpenWindow(IServiceScope scope,
-                                     Type viewType,
-                                     object parameter = null,
-                                     string windowTitle = "")
-        {
-            _scope = scope;
-
-            _appWindow = await AppWindow.TryCreateAsync();
-            _appWindow.Title = windowTitle;
-
-            _contentControl = new ContentControl
-            {
-                VerticalContentAlignment = VerticalAlignment.Stretch,
-                HorizontalContentAlignment = HorizontalAlignment.Stretch
-            };
-
-            var navigationService = (NavigationService)_scope.ServiceProvider.GetService<INavigationService>();
-            navigationService.Initialize(_contentControl);
-
-            ElementCompositionPreview.SetAppWindowContent(_appWindow, _contentControl);
-
-            _appWindows.Add(_contentControl.UIContext, _appWindow);
-
-            navigationService.Navigate(viewType, parameter);
-
-            _appWindow.Closed += AppWindow_Closed;
-
-           await _appWindow.TryShowAsync();
-        }
-
-        private void AppWindow_Closed(AppWindow sender, AppWindowClosedEventArgs args)
-        {
-            _appWindow.Closed -= AppWindow_Closed;
-            _appWindows.Remove(_contentControl.UIContext);
-            //navigationService = null;
-
-            _contentControl.Content = null;
-            _contentControl = null;
-            _appWindow = null;
-
-            _scope.Dispose();
-            _scope = null;
         }
 
         public async Task CloseWindowAsync()
@@ -117,6 +79,91 @@ namespace Inventory.Uwp.Services
             }
             System.GC.Collect();
         }
+
+        public async Task OpenDialogAsync(string title,
+                                          Exception ex,
+                                          string ok = "Ok")
+        {
+            await OpenDialogAsync(title, ex.Message, ok, null);
+        }
+
+        public async Task<bool> OpenDialogAsync(string title,
+                                                string content,
+                                                string ok = "Ok",
+                                                string cancel = null)
+        {
+            var dialog = new ContentDialog
+            {
+                Title = title,
+                Content = content,
+                PrimaryButtonText = ok,
+            };
+
+            if (cancel != null)
+            {
+                dialog.SecondaryButtonText = cancel;
+            }
+
+            if (_appWindow != null)
+            {
+                dialog.XamlRoot = _contentControl.XamlRoot;
+            }
+            else
+            {
+                dialog.XamlRoot = Window.Current.Content.XamlRoot;
+            }
+
+            var result = await dialog.ShowAsync();
+            return result == ContentDialogResult.Primary;
+        }
+
+        private async Task OpenWindow(IServiceScope scope,
+                                      Type viewType,
+                                      object parameter = null,
+                                      string windowTitle = "")
+        {
+            _scope = scope;
+
+            _appWindow = await AppWindow.TryCreateAsync();
+            _appWindow.Title = windowTitle;
+
+            _contentControl = new ContentControl
+            {
+                VerticalContentAlignment = VerticalAlignment.Stretch,
+                HorizontalContentAlignment = HorizontalAlignment.Stretch
+            };
+
+            var navigationService = (NavigationService)_serviceProvider.GetService<INavigationService>();
+            navigationService.Initialize(_contentControl);
+
+            ElementCompositionPreview.SetAppWindowContent(_appWindow, _contentControl);
+
+            _appWindows.Add(_contentControl.UIContext, _appWindow);
+
+            navigationService.Navigate(viewType, parameter);
+
+            _appWindow.Closed += AppWindow_Closed;
+
+            await _appWindow.TryShowAsync();
+        }
+
+        private void AppWindow_Closed(AppWindow sender,
+                                      AppWindowClosedEventArgs args)
+        {
+            _appWindow.Closed -= AppWindow_Closed;
+            _appWindows.Remove(_contentControl.UIContext);
+            //navigationService = null;
+
+            _contentControl.Content = null;
+            _contentControl = null;
+            _appWindow = null;
+
+            _scope.Dispose();
+            _scope = null;
+        }
+
+
+        #region dispose
 
         protected virtual void Dispose(bool disposing)
         {
@@ -147,5 +194,7 @@ namespace Inventory.Uwp.Services
             Dispose(disposing: true);
             GC.SuppressFinalize(this);
         }
+
+        #endregion
     }
 }

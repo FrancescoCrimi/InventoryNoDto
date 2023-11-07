@@ -27,7 +27,7 @@ namespace Inventory.Uwp.ViewModels.Common
         : ViewModelBase where TModel : Inventory.Infrastructure.Common.ObservableObject<TModel>, new()
     {
         private readonly INavigationService _navigationService;
-        private readonly IWindowManagerService _windowService;
+        protected readonly IWindowManagerService _windowService;
         private bool _isEditMode = false;
         private bool _isEnabled = true;
         private TModel _item = null;
@@ -39,14 +39,11 @@ namespace Inventory.Uwp.ViewModels.Common
         private AsyncRelayCommand _deleteCommand;
 
         public GenericDetailsViewModel(INavigationService navigationService,
-                                       IWindowManagerService windowService
-            //, LookupTablesService lookupTablesService
-            )
+                                       IWindowManagerService windowService)
             : base()
         {
             _navigationService = navigationService;
             _windowService = windowService;
-            //LookupTables = lookupTablesService;
         }
 
         #region public property
@@ -152,7 +149,7 @@ namespace Inventory.Uwp.ViewModels.Common
             }
             else
             {
-                await ShowDialogAsync(result.Message, $"{result.Description} Please, correct the error and try again.");
+                await _windowService.OpenDialogAsync(result.Message, $"{result.Description} Please, correct the error and try again.");
             }
         }
 

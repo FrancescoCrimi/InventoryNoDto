@@ -50,6 +50,7 @@ namespace Inventory.Uwp
         {
             InitializeComponent();
             _serviceProvider = GetServiceProvider();
+            Ioc.Default.ConfigureServices(_serviceProvider);
             Suspending += OnSuspending;
             UnhandledException += OnUnhandledException;
         }
@@ -122,8 +123,8 @@ namespace Inventory.Uwp
             return new ServiceCollection()
 
                 // Services
-                .AddScoped< INavigationService, NavigationService >()
-                .AddScoped< IWindowManagerService, WindowManagerService >()
+                .AddScoped<INavigationService, NavigationService>()
+                .AddScoped<IWindowManagerService, WindowManagerService>()
                 .AddSingleton<AppSettings>()
                 .AddSingleton<IAppSettings>(x => x.GetRequiredService<AppSettings>())
 

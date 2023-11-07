@@ -34,7 +34,7 @@ namespace Inventory.Uwp.Views.Logs
         {
             var args = ViewModel.LogList.CreateArgs();
             args.IsMainView = false;
-            await _windowService.OpenWindow(typeof(LogsView), args);
+            await _windowService.OpenWindowAsync(typeof(LogsView), args);
         }
 
         public int GetRowSpan(bool isMultipleSelection)

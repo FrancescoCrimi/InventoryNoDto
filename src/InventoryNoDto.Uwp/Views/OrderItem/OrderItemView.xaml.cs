@@ -40,7 +40,7 @@ namespace Inventory.Uwp.Views.OrderItems
 
         public async void OnNavigatedTo(object parameter)
         {
-            ViewModel.Initialize(XamlRoot);
+            //ViewModel.Initialize(XamlRoot);
             ViewModel.Subscribe();
             await ViewModel.LoadAsync(parameter as OrderItemDetailsArgs);
 

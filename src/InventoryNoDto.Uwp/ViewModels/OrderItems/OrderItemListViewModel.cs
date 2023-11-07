@@ -161,7 +161,7 @@ namespace Inventory.Uwp.ViewModels.OrderItems
             {
                 if (SelectedItem != null)
                 {
-                    await _windowService.OpenWindow(typeof(OrderItemView), new OrderItemDetailsArgs { OrderId = SelectedItem.OrderId, OrderLine = SelectedItem.OrderLine, OrderItem = SelectedItem, Order = Order });
+                    await _windowService.OpenWindowAsync(typeof(OrderItemView), new OrderItemDetailsArgs { OrderId = SelectedItem.OrderId, OrderLine = SelectedItem.OrderLine, OrderItem = SelectedItem, Order = Order });
                 }
             }));
 
@@ -170,7 +170,7 @@ namespace Inventory.Uwp.ViewModels.OrderItems
             {
                 if (IsMainView)
                 {
-                    await _windowService.OpenWindow(typeof(OrderItemView), new OrderItemDetailsArgs { OrderId = ViewModelArgs.OrderId, Order = Order });
+                    await _windowService.OpenWindowAsync(typeof(OrderItemView), new OrderItemDetailsArgs { OrderId = ViewModelArgs.OrderId, Order = Order });
                 }
                 else
                 {
@@ -250,7 +250,7 @@ namespace Inventory.Uwp.ViewModels.OrderItems
             ?? (_deleteSelectionCommand = new RelayCommand(async () =>
             {
                 StatusReady();
-                if (await ShowDialogAsync("Confirm Delete", "Are you sure you want to delete selected order items?", "Ok", "Cancel"))
+                if (await _windowService.OpenDialogAsync("Confirm Delete", "Are you sure you want to delete selected order items?", "Ok", "Cancel"))
                 {
                     var count = 0;
                     try

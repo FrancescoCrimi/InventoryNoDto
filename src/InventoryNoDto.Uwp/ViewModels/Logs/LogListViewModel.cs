@@ -12,6 +12,7 @@ using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using Inventory.Infrastructure.Common;
 using Inventory.Infrastructure.Logging;
+using Inventory.Uwp.Contracts.Services;
 using Inventory.Uwp.Library.Common;
 using Inventory.Uwp.Services.VirtualCollections;
 using Inventory.Uwp.ViewModels.Common;
@@ -29,6 +30,7 @@ namespace Inventory.Uwp.ViewModels.Logs
         private readonly ILogger _logger;
         private readonly LogService _logService;
         private readonly LogCollection _collection;
+        private readonly IWindowManagerService _windowManagerService;
         private Log _selectedItem = default;
         private IList<Log> _items = null;
         private string _query = null;
@@ -37,12 +39,14 @@ namespace Inventory.Uwp.ViewModels.Logs
 
         public LogListViewModel(ILogger<LogListViewModel> logger,
                                 LogService logService,
-                                LogCollection collection)
+                                LogCollection collection,
+            IWindowManagerService windowManagerService)
             : base()
         {
             _logger = logger;
             _logService = logService;
             _collection = collection;
+            _windowManagerService = windowManagerService;
             Items = collection;
         }
 
@@ -223,7 +227,7 @@ namespace Inventory.Uwp.ViewModels.Logs
         private async void OnDeleteSelection()
         {
             StatusReady();
-            if (await ShowDialogAsync("Confirm Delete", "Are you sure you want to delete selected logs?", "Ok", "Cancel"))
+            if (await _windowManagerService.OpenDialogAsync("Confirm Delete", "Are you sure you want to delete selected logs?", "Ok", "Cancel"))
             {
                 int count = 0;
                 try

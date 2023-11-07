@@ -10,10 +10,7 @@
 // THE CODE OR THE USE OR OTHER DEALINGS IN THE CODE.
 
 using CommunityToolkit.Mvvm.Messaging;
-using Inventory.Uwp.Services;
 using System.Diagnostics;
-using System.Threading.Tasks;
-using Windows.UI.Xaml;
 
 namespace Inventory.Uwp.ViewModels.Common
 {
@@ -23,20 +20,6 @@ namespace Inventory.Uwp.ViewModels.Common
 
         public ViewModelBase()
         {
-        }
-
-        protected XamlRoot ViewXamlRoot { get; set; }
-        public void Initialize(XamlRoot xamlRoot)
-        {
-            ViewXamlRoot = xamlRoot;
-        }
-
-        protected Task<bool> ShowDialogAsync(string title,
-                                             string content,
-                                             string ok = "Ok",
-                                             string cancel = null)
-        {
-            return DialogService.Current.ShowAsync(title, content, ok, cancel, ViewXamlRoot);
         }
 
         private bool isMainView = true;

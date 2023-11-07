@@ -17,6 +17,16 @@ namespace Inventory.Uwp.Contracts.Services
     {
         Task CloseAllWindowsAsync();
         Task CloseWindowAsync();
-        Task OpenWindow(Type pageType, object parameter = null, string windowTitle = "");
+        Task OpenDialogAsync(string title,
+                             Exception ex,
+                             string ok = "Ok");
+        Task<bool> OpenDialogAsync(string title,
+                                   string content,
+                                   string ok = "Ok",
+                                   string cancel = null);
+
+        Task OpenWindowAsync(Type pageType,
+                             object parameter = null,
+                             string windowTitle = "");
     }
 }
