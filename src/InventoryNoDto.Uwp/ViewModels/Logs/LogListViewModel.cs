@@ -227,7 +227,7 @@ namespace Inventory.Uwp.ViewModels.Logs
         private async void OnDeleteSelection()
         {
             StatusReady();
-            if (await _windowManagerService.OpenDialogAsync("Confirm Delete", "Are you sure you want to delete selected logs?", "Ok", "Cancel"))
+            if (await _windowManagerService.OpenDialog("Confirm Delete", "Are you sure you want to delete selected logs?", "Ok", "Cancel"))
             {
                 int count = 0;
                 try

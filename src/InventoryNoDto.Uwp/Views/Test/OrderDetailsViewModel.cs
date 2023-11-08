@@ -136,7 +136,7 @@ namespace Inventory.Uwp.Views.Test
                 {
                     Task.Run(async () =>
                     {
-                        await _windowService.CloseWindowAsync();
+                        await _windowService.CloseWindow();
                     });
                 }
                 return;
@@ -294,7 +294,7 @@ namespace Inventory.Uwp.Views.Test
 
         private async Task<bool> ConfirmDeleteAsync()
         {
-            return await _windowService.OpenDialogAsync("Confirm Delete", "Are you sure you want to delete current order?", "Ok", "Cancel");
+            return await _windowService.OpenDialog("Confirm Delete", "Are you sure you want to delete current order?", "Ok", "Cancel");
         }
 
         private IEnumerable<IValidationConstraint<Order>> GetValidationConstraints(Order model)
@@ -458,7 +458,7 @@ namespace Inventory.Uwp.Views.Test
             }
             else
             {
-                await _windowService.OpenDialogAsync(result.Message, $"{result.Description} Please, correct the error and try again.");
+                await _windowService.OpenDialog(result.Message, $"{result.Description} Please, correct the error and try again.");
             }
         }
 

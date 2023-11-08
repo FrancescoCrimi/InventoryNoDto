@@ -201,7 +201,7 @@ namespace Inventory.Uwp.ViewModels.Products
 
         protected async override Task<bool> ConfirmDeleteAsync()
         {
-            return await _windowService.OpenDialogAsync("Confirm Delete", "Are you sure you want to delete current product?", "Ok", "Cancel");
+            return await _windowService.OpenDialog("Confirm Delete", "Are you sure you want to delete current product?", "Ok", "Cancel");
         }
 
         protected override IEnumerable<IValidationConstraint<Product>> GetValidationConstraints(Product model)

@@ -49,16 +49,7 @@ namespace Inventory.Uwp.Services
             _logger.LogInformation("Constructor: {HashCode}", GetHashCode().ToString());
         }
 
-        public async Task OpenWindowAsync(Type pageType,
-                                     object parameter = null,
-                                     string windowTitle = "")
-        {
-            var scope = _serviceScopeFactory.CreateScope();
-            var wms = (WindowManagerService)scope.ServiceProvider.GetRequiredService<IWindowManagerService>();
-            await wms.OpenWindow(scope, pageType, parameter, windowTitle);
-        }
-
-        public async Task CloseWindowAsync()
+        public async Task CloseWindow()
         {
             if (_appWindow != null)
             {
@@ -70,7 +61,7 @@ namespace Inventory.Uwp.Services
             }
         }
 
-        public async Task CloseAllWindowsAsync()
+        public async Task CloseAllWindows()
         {
             foreach (var pair in _appWindows.ToList())
             {
@@ -80,17 +71,17 @@ namespace Inventory.Uwp.Services
             System.GC.Collect();
         }
 
-        public async Task OpenDialogAsync(string title,
-                                          Exception ex,
-                                          string ok = "Ok")
+        public async Task OpenDialog(string title,
+                                     Exception ex,
+                                     string ok = "Ok")
         {
-            await OpenDialogAsync(title, ex.Message, ok, null);
+            await OpenDialog(title, ex.Message, ok, null);
         }
 
-        public async Task<bool> OpenDialogAsync(string title,
-                                                string content,
-                                                string ok = "Ok",
-                                                string cancel = null)
+        public async Task<bool> OpenDialog(string title,
+                                           string content,
+                                           string ok = "Ok",
+                                           string cancel = null)
         {
             var dialog = new ContentDialog
             {
@@ -117,6 +108,16 @@ namespace Inventory.Uwp.Services
             return result == ContentDialogResult.Primary;
         }
 
+        public async Task OpenWindow(Type pageType,
+                                     object parameter = null,
+                                     string windowTitle = "")
+        {
+            var scope = _serviceScopeFactory.CreateScope();
+            var wms = (WindowManagerService)scope.ServiceProvider.GetRequiredService<IWindowManagerService>();
+            await wms.OpenWindow(scope, pageType, parameter, windowTitle);
+        }
+
+
         private async Task OpenWindow(IServiceScope scope,
                                       Type viewType,
                                       object parameter = null,
@@ -139,10 +140,9 @@ namespace Inventory.Uwp.Services
             ElementCompositionPreview.SetAppWindowContent(_appWindow, _contentControl);
 
             _appWindows.Add(_contentControl.UIContext, _appWindow);
+            _appWindow.Closed += AppWindow_Closed;
 
             navigationService.Navigate(viewType, parameter);
-
-            _appWindow.Closed += AppWindow_Closed;
 
             await _appWindow.TryShowAsync();
         }

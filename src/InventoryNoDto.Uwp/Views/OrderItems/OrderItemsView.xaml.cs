@@ -36,14 +36,14 @@ namespace Inventory.Uwp.Views.OrderItems
         // TODO: remove this method and put it iinto ViewModel
         private async void OpenInNewView(object sender, RoutedEventArgs e)
         {
-            await _windowService.OpenWindowAsync(typeof(OrderItemsView), ViewModel.OrderItemList.CreateArgs());
+            await _windowService.OpenWindow(typeof(OrderItemsView), ViewModel.OrderItemList.CreateArgs());
         }
 
         // TODO: remove this method and put it iinto ViewModel
         private async void OpenDetailsInNewView(object sender, RoutedEventArgs e)
         {
             //ViewModel.OrderItemDetails.CancelEdit();
-            await _windowService.OpenWindowAsync(typeof(OrderItemView), ViewModel.OrderItemDetails.CreateArgs());
+            await _windowService.OpenWindow(typeof(OrderItemView), ViewModel.OrderItemDetails.CreateArgs());
         }
 
         public int GetRowSpan(bool isMultipleSelection)

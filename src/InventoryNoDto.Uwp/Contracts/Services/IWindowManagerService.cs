@@ -15,17 +15,19 @@ namespace Inventory.Uwp.Contracts.Services
 {
     public interface IWindowManagerService
     {
-        Task CloseAllWindowsAsync();
-        Task CloseWindowAsync();
-        Task OpenDialogAsync(string title,
+        Task CloseAllWindows();
+
+        Task CloseWindow();
+
+        Task OpenDialog(string title,
                              Exception ex,
                              string ok = "Ok");
-        Task<bool> OpenDialogAsync(string title,
+        Task<bool> OpenDialog(string title,
                                    string content,
                                    string ok = "Ok",
                                    string cancel = null);
 
-        Task OpenWindowAsync(Type pageType,
+        Task OpenWindow(Type pageType,
                              object parameter = null,
                              string windowTitle = "");
     }

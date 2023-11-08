@@ -135,7 +135,7 @@ namespace Inventory.Uwp.ViewModels.Orders
             {
                 if (SelectedItem != null)
                 {
-                    return _windowService.OpenWindowAsync(typeof(OrderView), new OrderArgs { OrderId = SelectedItem.Id });
+                    return _windowService.OpenWindow(typeof(OrderView), new OrderArgs { OrderId = SelectedItem.Id });
                 }
                 else
                     return Task.CompletedTask;
@@ -146,7 +146,7 @@ namespace Inventory.Uwp.ViewModels.Orders
             if (IsMainView)
             {
                 //await _windowService.OpenInNewWindow<Views.Test.OrderPage>(new OrderArgs { CustomerId = ViewModelArgs.CustomerId });
-                await _windowService.OpenWindowAsync(typeof(OrderView), new OrderArgs { CustomerId = ViewModelArgs.CustomerId });
+                await _windowService.OpenWindow(typeof(OrderView), new OrderArgs { CustomerId = ViewModelArgs.CustomerId });
             }
             else
             {
@@ -168,7 +168,7 @@ namespace Inventory.Uwp.ViewModels.Orders
         protected async override void OnDeleteSelection()
         {
             StatusReady();
-            if (await _windowService.OpenDialogAsync("Confirm Delete", "Are you sure you want to delete selected orders?", "Ok", "Cancel"))
+            if (await _windowService.OpenDialog("Confirm Delete", "Are you sure you want to delete selected orders?", "Ok", "Cancel"))
             {
                 var count = 0;
                 try

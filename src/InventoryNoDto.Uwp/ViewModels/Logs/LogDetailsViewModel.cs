@@ -121,7 +121,7 @@ namespace Inventory.Uwp.ViewModels.Logs
         }
         private async Task<bool> ConfirmDeleteAsync()
         {
-            return await _windowManagerService.OpenDialogAsync("Confirm Delete", "Are you sure you want to delete current log?", "Ok", "Cancel");
+            return await _windowManagerService.OpenDialog("Confirm Delete", "Are you sure you want to delete current log?", "Ok", "Cancel");
         }
         private async Task DeleteAsync()
         {

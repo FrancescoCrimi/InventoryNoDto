@@ -38,7 +38,7 @@ namespace Inventory.Uwp.Views.Customers
         {
             var args = ViewModel.CustomerList.CreateArgs();
             args.IsMainView = false;
-            await _windowService.OpenWindowAsync(typeof(CustomersView), args);
+            await _windowService.OpenWindow(typeof(CustomersView), args);
         }
 
         // TODO: remove this method and put it iinto ViewModel
@@ -47,11 +47,11 @@ namespace Inventory.Uwp.Views.Customers
             ViewModel.CustomerDetails.CancelEdit();
             if (pivot.SelectedIndex == 0)
             {
-                await _windowService.OpenWindowAsync(typeof(CustomerView), ViewModel.CustomerDetails.CreateArgs());
+                await _windowService.OpenWindow(typeof(CustomerView), ViewModel.CustomerDetails.CreateArgs());
             }
             else
             {
-                await _windowService.OpenWindowAsync(typeof(CustomerView), ViewModel.CustomerOrders.CreateArgs());
+                await _windowService.OpenWindow(typeof(CustomerView), ViewModel.CustomerOrders.CreateArgs());
             }
         }
 

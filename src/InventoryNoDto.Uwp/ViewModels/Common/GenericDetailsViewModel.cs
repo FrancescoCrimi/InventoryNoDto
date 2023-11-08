@@ -149,7 +149,7 @@ namespace Inventory.Uwp.ViewModels.Common
             }
             else
             {
-                await _windowService.OpenDialogAsync(result.Message, $"{result.Description} Please, correct the error and try again.");
+                await _windowService.OpenDialog(result.Message, $"{result.Description} Please, correct the error and try again.");
             }
         }
 
@@ -226,7 +226,7 @@ namespace Inventory.Uwp.ViewModels.Common
                 {
                     Task.Run(async () =>
                     {
-                        await _windowService.CloseWindowAsync();
+                        await _windowService.CloseWindow();
                     });
                 }
                 return;

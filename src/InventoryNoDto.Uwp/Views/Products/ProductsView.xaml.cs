@@ -34,7 +34,7 @@ namespace Inventory.Uwp.Views.Products
         {
             var args = ViewModel.ProductList.CreateArgs();
             args.IsMainView = false;
-            await _windowService.OpenWindowAsync(typeof(ProductsView), args);
+            await _windowService.OpenWindow(typeof(ProductsView), args);
         }
 
         public int GetRowSpan(bool isMultipleSelection)

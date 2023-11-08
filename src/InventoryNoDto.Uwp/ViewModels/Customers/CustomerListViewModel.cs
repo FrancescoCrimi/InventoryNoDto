@@ -64,7 +64,7 @@ namespace Inventory.Uwp.ViewModels.Customers
         {
             if (SelectedItem != null)
             {
-                await _windowService.OpenWindowAsync(typeof(CustomerView), new CustomerDetailsArgs { CustomerId = SelectedItem.Id });
+                await _windowService.OpenWindow(typeof(CustomerView), new CustomerDetailsArgs { CustomerId = SelectedItem.Id });
             }
         }
 
@@ -134,7 +134,7 @@ namespace Inventory.Uwp.ViewModels.Customers
         {
             if (IsMainView)
             {
-                await _windowService.OpenWindowAsync(typeof(CustomerView), new CustomerDetailsArgs());
+                await _windowService.OpenWindow(typeof(CustomerView), new CustomerDetailsArgs());
             }
             else
             {
@@ -156,7 +156,7 @@ namespace Inventory.Uwp.ViewModels.Customers
         protected async override void OnDeleteSelection()
         {
             StatusReady();
-            if (await _windowService.OpenDialogAsync("Confirm Delete", "Are you sure you want to delete selected customers?", "Ok", "Cancel"))
+            if (await _windowService.OpenDialog("Confirm Delete", "Are you sure you want to delete selected customers?", "Ok", "Cancel"))
             {
                 var count = 0;
                 try

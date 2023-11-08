@@ -144,12 +144,12 @@ namespace Inventory.Uwp.ViewModels.Settings
             IsBusy = false;
             if (result.IsOk)
             {
-                await _windowManagerService.OpenDialogAsync("Reset Local Data Provider", "Local Data Provider restore successfully.");
+                await _windowManagerService.OpenDialog("Reset Local Data Provider", "Local Data Provider restore successfully.");
                 StatusReady();
             }
             else
             {
-                await _windowManagerService.OpenDialogAsync("Reset Local Data Provider", result.Message);
+                await _windowManagerService.OpenDialog("Reset Local Data Provider", result.Message);
                 StatusMessage(result.Message);
             }
         }

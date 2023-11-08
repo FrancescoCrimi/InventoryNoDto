@@ -61,7 +61,7 @@ namespace Inventory.Uwp.ViewModels.Products
 
         private async void ItemInvoked(Product model)
         {
-            await _windowService.OpenWindowAsync(typeof(ProductView), new ProductDetailsArgs { ProductId = model.Id });
+            await _windowService.OpenWindow(typeof(ProductView), new ProductDetailsArgs { ProductId = model.Id });
         }
 
         public async Task LoadAsync(ProductListArgs args)
@@ -132,7 +132,7 @@ namespace Inventory.Uwp.ViewModels.Products
 
             if (IsMainView)
             {
-                await _windowService.OpenWindowAsync(typeof(ProductView), new ProductDetailsArgs());
+                await _windowService.OpenWindow(typeof(ProductView), new ProductDetailsArgs());
             }
             else
             {
@@ -154,7 +154,7 @@ namespace Inventory.Uwp.ViewModels.Products
         protected async override void OnDeleteSelection()
         {
             StatusReady();
-            if (await _windowService.OpenDialogAsync("Confirm Delete", "Are you sure you want to delete selected products?", "Ok", "Cancel"))
+            if (await _windowService.OpenDialog("Confirm Delete", "Are you sure you want to delete selected products?", "Ok", "Cancel"))
             {
                 var count = 0;
                 try

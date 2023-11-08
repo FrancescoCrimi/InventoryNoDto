@@ -210,7 +210,7 @@ namespace Inventory.Uwp.ViewModels.OrderItems
                 {
                     Task.Run(async () =>
                     {
-                        await _windowService.CloseWindowAsync();
+                        await _windowService.CloseWindow();
                     });
                 }
                 return;
