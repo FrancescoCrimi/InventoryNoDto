@@ -53,9 +53,13 @@
                                              Text="{x:Bind Item.ShipRegion, Mode=TwoWay}" />
                     <libcontrols:FormComboBox Header="Ship Country"
                                               ItemsSource="{x:Bind Countries}"
+                                              SelectedItem="{x:Bind Item.ShipCountry, Mode=TwoWay}"
+                                              DisplayMemberPath="Name" />
+                    <!--<libcontrols:FormComboBox Header="Ship Country"
+                                              ItemsSource="{x:Bind Countries}"
                                               SelectedValue="{x:Bind Item.ShipCountryId, Mode=TwoWay}"
                                               SelectedValuePath="Id"
-                                              DisplayMemberPath="Name" />
+                                              DisplayMemberPath="Name" />-->
                 </libcontrols:FluidGrid>
 
                 <TextBlock Style="{StaticResource FormsSection}"
@@ -64,16 +68,25 @@
 
                 <libcontrols:FormComboBox Header="Status"
                                           ItemsSource="{x:Bind OrderStatuses}"
+                                          SelectedItem="{x:Bind Item.Status, Mode=TwoWay}"
+                                          DisplayMemberPath="Name" />
+                <!--<libcontrols:FormComboBox Header="Status"
+                                          ItemsSource="{x:Bind OrderStatuses}"
                                           SelectedValue="{x:Bind Item.StatusId, Mode=TwoWay, Converter={StaticResource NullableInt64Converter}}"
                                           SelectedValuePath="Id"
-                                          DisplayMemberPath="Name" />
+                                          DisplayMemberPath="Name" />-->
 
                 <libcontrols:FormComboBox Header="Payment Type"
+                                          ItemsSource="{x:Bind PaymentTypes}"
+                                          SelectedItem="{x:Bind Item.PaymentType, Mode=TwoWay}"
+                                          DisplayMemberPath="Name"
+                                          Visibility="{x:Bind Item.CanEditPayment, Mode=OneWay}" />
+                <!--<libcontrols:FormComboBox Header="Payment Type"
                                           ItemsSource="{x:Bind PaymentTypes}"
                                           SelectedValue="{x:Bind Item.PaymentTypeId, Mode=TwoWay, Converter={StaticResource NullableInt64Converter}}"
                                           SelectedValuePath="Id"
                                           DisplayMemberPath="Name"
-                                          Visibility="{x:Bind Item.CanEditPayment, Mode=OneWay}" />
+                                          Visibility="{x:Bind Item.CanEditPayment, Mode=OneWay}" />-->
 
                 <libcontrols:FluidGrid Columns="2"
                                        ColumnSpacing="6"
@@ -85,10 +98,15 @@
                                                         Visibility="{x:Bind Item.CanEditShipping, Mode=OneWay}" />
                     <libcontrols:FormComboBox Header="Ship Via"
                                               ItemsSource="{x:Bind Shippers}"
+                                              SelectedItem="{x:Bind Item.Shipper, Mode=TwoWay}"
+                                              DisplayMemberPath="Name"
+                                              Visibility="{x:Bind Item.CanEditShipping, Mode=OneWay}" />
+                    <!--<libcontrols:FormComboBox Header="Ship Via"
+                                              ItemsSource="{x:Bind Shippers}"
                                               SelectedValue="{x:Bind Item.ShipperId, Mode=TwoWay, Converter={StaticResource NullableInt64Converter}}"
                                               SelectedValuePath="Id"
                                               DisplayMemberPath="Name"
-                                              Visibility="{x:Bind Item.CanEditShipping, Mode=OneWay}" />
+                                              Visibility="{x:Bind Item.CanEditShipping, Mode=OneWay}" />-->
                 </libcontrols:FluidGrid>
 
                 <libcontrols:FormCalendarDatePicker Header="Delivered Date"
@@ -115,7 +133,7 @@
                       BorderThickness="0,1,1,0"
                       Background="{StaticResource DetailsViewBackgroundColor}">
                     <ordersviews:OrdersCard Margin="6"
-                                                   Item="{x:Bind ViewModel.OrderDetails.Item, Mode=OneWay}" />
+                                            Item="{x:Bind ViewModel.OrderDetails.Item, Mode=OneWay}" />
                 </Grid>
 
                 <!--Order Column-->

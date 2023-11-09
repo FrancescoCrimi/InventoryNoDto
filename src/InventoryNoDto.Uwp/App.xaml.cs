@@ -45,14 +45,16 @@ namespace Inventory.Uwp
     public sealed partial class App : Windows.UI.Xaml.Application
     {
         private readonly IServiceProvider _serviceProvider;
+        private ILogger _logger;
 
         public App()
         {
             InitializeComponent();
-            _serviceProvider = GetServiceProvider();
-            Ioc.Default.ConfigureServices(_serviceProvider);
             Suspending += OnSuspending;
             UnhandledException += OnUnhandledException;
+            _serviceProvider = GetServiceProvider();
+            Ioc.Default.ConfigureServices(_serviceProvider);
+            _logger = _serviceProvider.GetService<ILogger<App>>();
         }
 
         protected async override void OnLaunched(LaunchActivatedEventArgs e)
@@ -70,19 +72,17 @@ namespace Inventory.Uwp
 
         private async Task ActivateAsync(object args)
         {
+            await InitializeAsync();
             if (Window.Current.Content == null)
             {
                 Window.Current.Content = _serviceProvider.GetService<ShellView>();
             }
-
-            await InitializeAsync();
 
             object arguments = null;
             if (args is LaunchActivatedEventArgs launchArgs)
             {
                 arguments = launchArgs.Arguments;
             }
-
             _serviceProvider.GetService<INavigationService>().Navigate(typeof(DashboardView), arguments);
 
             Window.Current.Activate();
@@ -92,13 +92,10 @@ namespace Inventory.Uwp
         private async Task InitializeAsync()
         {
             ThemeSelectorService.Initialize();
-            //await WindowManagerService.Current.InitializeAsync();
             var appSettings = _serviceProvider.GetService<AppSettings>();
             await appSettings.EnsureLogDatabaseAsync();
             await appSettings.EnsureLocalDatabaseAsync();
-            _serviceProvider
-                .GetService<ILogger<App>>()
-                .LogInformation(LogEvents.Startup, "Application Started");
+            _logger.LogInformation(LogEvents.Startup, "Application Started");
         }
 
         private async Task StartupAsync()
@@ -108,14 +105,12 @@ namespace Inventory.Uwp
 
         private void OnSuspending(object sender, SuspendingEventArgs e)
         {
-            //var logger = Ioc.Default.GetService<ILogger<App>>();
-            //logger.LogInformation(LogEvents.Suspending, $"Application ended.");
+            _logger.LogInformation(LogEvents.Suspending, $"Application ended.");
         }
 
         private void OnUnhandledException(object sender, Windows.UI.Xaml.UnhandledExceptionEventArgs e)
         {
-            //var logger = Ioc.Default.GetService<ILogger<App>>();
-            //logger.LogError(LogEvents.UnhandledException, e.Exception, "Unhandled Exception");
+            _logger.LogError(LogEvents.UnhandledException, e.Exception, "Unhandled Exception");
         }
 
         private IServiceProvider GetServiceProvider()

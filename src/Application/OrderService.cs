@@ -45,7 +45,8 @@ namespace Inventory.Application
 
         public async Task<IList<Order>> GetOrdersAsync(int index, int length, DataRequest<Order> request)
         {
-            return await _orderRepository.GetOrdersAsync(index, length, request);
+            IList<Order> list = await _orderRepository.GetOrdersAsync(index, length, request);
+            return list;
         }
 
         public async Task<int> GetOrdersCountAsync(DataRequest<Order> request)
